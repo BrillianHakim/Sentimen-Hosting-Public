@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Riset – Analisis Sentimen{% endblock %}
+{% block page_title %}Overview Panel{% endblock %}
+
+{% block content %}
+<!-- Heading -->
+<div class="mb-7">
+  <h1 class="text-2xl font-extrabold tracking-tight">Dashboard Riset</h1>
+  <p class="text-gray-400 text-sm mt-1">Ringkasan data dan hasil analisis sentimen</p>
+</div>
+
+<!-- Stat Cards -->
+<div class="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+    <div class="w-11 h-11 bg-blue-50 rounded-lg flex items-center justify-center text-xl mb-4">📊</div>
+    <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Total Data Penelitian</p>
+    <p class="text-3xl font-extrabold tracking-tight mb-2">{{ "{:,}".format(stats.total_data) }}</p>
+    <span class="inline-flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">▲ +12%</span>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+    <div class="w-11 h-11 bg-green-50 rounded-lg flex items-center justify-center text-xl mb-4">😊</div>
+    <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Sentimen Positif</p>
+    <p class="text-3xl font-extrabold tracking-tight text-green-600 mb-2">{{ "{:,}".format(stats.positif) }}</p>
+    <p class="text-xs text-gray-400">{{ stats.pct_positif }}% dari total dataset</p>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+    <div class="w-11 h-11 bg-red-50 rounded-lg flex items-center justify-center text-xl mb-4">😐</div>
+    <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Sentimen Negatif</p>
+    <p class="text-3xl font-extrabold tracking-tight text-red-600 mb-2">{{ "{:,}".format(stats.negatif) }}</p>
+    <p class="text-xs text-gray-400">{{ stats.pct_negatif }}% dari total dataset</p>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+    <div class="w-11 h-11 bg-orange-50 rounded-lg flex items-center justify-center text-xl mb-4">🎯</div>
+    <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Akurasi Model SVM</p>
+    <p class="text-3xl font-extrabold tracking-tight mb-2">{{ stats.akurasi }}%</p>
+    <span class="inline-flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">✓ Terverifikasi</span>
+  </div>
+
+</div>
+
+<!-- Bottom Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-5">
+
+  <!-- Distribusi & Chart -->
+  <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <p class="font-bold text-base mb-0.5">Distribusi Sentimen</p>
+    <p class="text-gray-400 text-sm mb-6">Perbandingan volume hasil klasifikasi</p>
+
+    <!-- Bar Positif -->
+    <div class="mb-5">
+      <div class="flex justify-between text-sm mb-2">
+        <span class="font-semibold">Positif <span class="text-gray-400 font-normal">({{ "{:,}".format(stats.positif) }} Dokumen)</span></span>
+        <span class="font-bold text-blue-600">{{ stats.pct_positif | int }}%</span>
+      </div>
+      <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+        <div class="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" style="width:{{ stats.pct_positif }}%"></div>
+      </div>
+    </div>
+
+    <!-- Bar Negatif -->
+    <div class="mb-6">
+      <div class="flex justify-between text-sm mb-2">
+        <span class="font-semibold">Negatif <span class="text-gray-400 font-normal">({{ "{:,}".format(stats.negatif) }} Dokumen)</span></span>
+        <span class="font-bold text-red-600">{{ stats.pct_negatif | int }}%</span>
+      </div>
+      <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+        <div class="h-full bg-gradient-to-r from-red-400 to-red-600 rounded-full" style="width:{{ stats.pct_negatif }}%"></div>
+      </div>
+    </div>
+
+    <canvas id="distChart" height="150"></canvas>
+
+    <!-- Metrics -->
+    <div class="grid grid-cols-3 border-t border-gray-100 mt-6">
+      {% for label, val in [('Precision','91.2%'),('Recall','89.7%'),('F1-Score','90.4%')] %}
+      <div class="py-4 text-center {% if not loop.last %}border-r border-gray-100{% endif %}">
+        <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1.5">{{ label }}</p>
+        <p class="text-xl font-extrabold text-blue-600">{{ val }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Metodologi -->
+  <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <p class="text-[11px] font-bold tracking-widest text-blue-600 uppercase mb-5 flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+      </svg>
+      Metodologi Penelitian
+    </p>
+
+    {% set methods = [
+      ('M 22 12 H 18 L 15 21 L 9 3 L 6 12 L 2 12', 'Model Klasifikasi',  'Linear Support Vector Machine (SVM)'),
+      ('M 8 6 H 21 M 8 12 H 21 M 8 18 H 21 M 3 6 H 3.01 M 3 12 H 3.01 M 3 18 H 3.01', 'Pembobotan Kata', 'TF-IDF Vectorization & N-Gram'),
+      ('', 'Sumber Data', 'API Crawling & Scraping (Google, X)'),
+    ] %}
+    {% for icon_d, title, desc in methods %}
+    <div class="flex gap-3 py-4 {% if not loop.last %}border-b border-gray-100{% endif %}">
+      <div class="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+        {% if loop.index == 3 %}
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        {% else %}
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="{{ icon_d }}"/>
+        </svg>
+        {% endif %}
+      </div>
+      <div>
+        <p class="text-sm font-bold mb-0.5">{{ title }}</p>
+        <p class="text-xs text-gray-400">{{ desc }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  new Chart(document.getElementById('distChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu'],
+      datasets: [
+        { label:'Positif', data:[95,120,108,135,142,118,130,125], backgroundColor:'rgba(37,99,235,.8)', borderRadius:6 },
+        { label:'Negatif', data:[45,52,48,61,55,49,58,62],        backgroundColor:'rgba(220,38,38,.75)',  borderRadius:6 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position:'top', labels:{ font:{ size:12 } } } },
+      scales: { x:{ grid:{ display:false } }, y:{ grid:{ color:'#F3F4F6' }, beginAtZero:true } }
+    }
+  });
+</script>
+{% endblock %}

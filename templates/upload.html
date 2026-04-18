@@ -1,0 +1,454 @@
+{% extends "base.html" %}
+{% block title %}Upload Data – Analisis Sentimen{% endblock %}
+{% block page_title %}Upload Data{% endblock %}
+
+{% block content %}
+<div class="mb-7">
+  <h1 class="text-2xl font-extrabold tracking-tight">Upload Dataset</h1>
+  <p class="text-gray-400 text-sm mt-1">Upload file CSV atau Excel yang berisi kolom teks dan label sentimen</p>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-5">
+
+  <!-- ── Upload Card ── -->
+  <div class="space-y-5">
+
+    <!-- Drag & Drop Zone -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6">
+      <p class="font-bold mb-1">Pilih File Dataset</p>
+      <p class="text-gray-400 text-xs mb-4">Format: CSV atau Excel (.xlsx / .xls) · Maks. 10 MB</p>
+
+      <!-- Drop Zone -->
+      <div id="dropZone"
+           class="border-2 border-dashed border-gray-200 rounded-xl p-10 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-all"
+           onclick="document.getElementById('fileInput').click()"
+           ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+        <div id="dropContent">
+          <div class="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-7 h-7 text-blue-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <p class="font-semibold text-gray-700 mb-1">Drag & drop file ke sini</p>
+          <p class="text-gray-400 text-sm">atau <span class="text-blue-600 font-semibold">klik untuk pilih file</span></p>
+          <p class="text-gray-300 text-xs mt-3">CSV, XLSX, XLS · Maks 10 MB</p>
+        </div>
+        <div id="fileSelected" class="hidden">
+          <div class="w-14 h-14 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+            <svg class="w-7 h-7 text-green-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <p id="selectedFileName" class="font-semibold text-gray-800 mb-1"></p>
+          <p id="selectedFileSize" class="text-gray-400 text-sm"></p>
+          <button type="button" onclick="clearFile(event)"
+                  class="mt-3 text-xs text-red-500 hover:underline">Ganti file</button>
+        </div>
+      </div>
+      <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="hidden" onchange="onFileChange(this)"/>
+
+      <!-- Nama Dataset -->
+      <div class="mt-4">
+        <label class="block text-sm font-semibold mb-1.5">Nama Dataset</label>
+        <input type="text" id="namaDataset" placeholder="Contoh: Dataset Twitter Sentimen 2024"
+               class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"/>
+      </div>
+
+      <!-- Error Alert -->
+      <div id="alertError" class="hidden mt-4 flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+        <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="alertErrorMsg"></span>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3 mt-5">
+        <button id="btnPreview" onclick="doPreview()"
+                class="flex items-center gap-2 px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg text-sm transition disabled:opacity-40" disabled>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          Preview & Validasi
+        </button>
+        <button id="btnSave" onclick="doSave()"
+                class="hidden flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Simpan ke Database
+        </button>
+      </div>
+    </div>
+
+    <!-- Preview Section -->
+    <div id="previewSection" class="hidden bg-white border border-gray-200 rounded-xl p-6">
+
+      <!-- Validation Result -->
+      <div id="validationOk" class="hidden mb-5 flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+        <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <div>
+          <p class="text-sm font-bold text-green-700">Validasi Berhasil</p>
+          <p id="validationMsg" class="text-xs text-green-600"></p>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="grid grid-cols-4 gap-3 mb-6">
+        <div class="bg-gray-50 rounded-lg p-3 text-center">
+          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Total</p>
+          <p id="statTotal" class="text-xl font-extrabold text-gray-800">-</p>
+        </div>
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Positif</p>
+          <p id="statPositif" class="text-xl font-extrabold text-green-600">-</p>
+        </div>
+        <div class="bg-red-50 rounded-lg p-3 text-center">
+          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Negatif</p>
+          <p id="statNegatif" class="text-xl font-extrabold text-red-600">-</p>
+        </div>
+        <div class="bg-yellow-50 rounded-lg p-3 text-center">
+          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Netral</p>
+          <p id="statNetral" class="text-xl font-extrabold text-yellow-500">-</p>
+        </div>
+      </div>
+
+      <!-- Detected Columns -->
+      <div class="flex gap-3 mb-5 text-xs">
+        <div class="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full font-semibold">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Kolom Teks: <span id="colText" class="font-bold"></span>
+        </div>
+        <div class="flex items-center gap-1.5 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full font-semibold">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 0 1 0 2.828l-7 7a2 2 0 0 1-2.828 0l-7-7A2 2 0 0 1 3 12V7a4 4 0 0 1 4-4z"/>
+          </svg>
+          Kolom Label: <span id="colLabel" class="font-bold"></span>
+        </div>
+      </div>
+
+      <!-- Preview Table -->
+      <p class="text-sm font-bold mb-3">Preview Data (10 baris pertama)</p>
+      <div class="overflow-x-auto rounded-lg border border-gray-100">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-100">
+              <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase tracking-wide w-8">#</th>
+              <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase tracking-wide">Teks</th>
+              <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase tracking-wide w-28">Label</th>
+            </tr>
+          </thead>
+          <tbody id="previewTableBody" class="divide-y divide-gray-50"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Right Panel ── -->
+  <div class="space-y-5">
+
+    <!-- Format Guide -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <p class="font-bold text-sm mb-4 flex items-center gap-2">
+        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        Format File yang Didukung
+      </p>
+      <div class="space-y-3 text-sm text-gray-500">
+        <p>File harus memiliki minimal <span class="font-semibold text-gray-700">2 kolom</span>:</p>
+        <div class="bg-gray-50 rounded-lg p-3 font-mono text-xs space-y-1">
+          <p class="text-green-600 font-bold">✓ Kolom Teks</p>
+          <p class="text-gray-400 ml-3">teks / text / tweet / komentar / content / ulasan</p>
+          <p class="text-blue-600 font-bold mt-2">✓ Kolom Label</p>
+          <p class="text-gray-400 ml-3">label / sentimen / sentiment / kategori / class</p>
+        </div>
+        <p class="text-xs text-gray-400 mt-2">Nilai label: <span class="font-semibold">positif</span>, <span class="font-semibold">negatif</span>, atau <span class="font-semibold">netral</span></p>
+      </div>
+    </div>
+
+    <!-- Contoh CSV -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <p class="font-bold text-sm mb-3">Contoh Struktur CSV</p>
+      <div class="bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-600 overflow-x-auto">
+        <p class="text-blue-600 font-bold">teks,label</p>
+        <p>Produk ini sangat bagus!,positif</p>
+        <p>Pelayanan sangat buruk,negatif</p>
+        <p>Biasa saja tidak ada yang spesial,netral</p>
+      </div>
+    </div>
+
+    <!-- Riwayat Upload -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+
+      <!-- Header + Tombol Hapus Semua -->
+      <div class="flex items-center justify-between mb-4">
+        <p class="font-bold text-sm">Riwayat Upload</p>
+        {% if datasets %}
+        <button onclick="confirmDeleteAll()"
+                class="flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+          </svg>
+          Hapus Semua
+        </button>
+        {% endif %}
+      </div>
+
+      {% if datasets %}
+      <div class="space-y-3">
+        {% for ds in datasets %}
+        <div class="flex items-start justify-between gap-2 p-3 bg-gray-50 rounded-lg">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-gray-800 truncate">{{ ds.nama }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ ds.total_rows }} baris · {{ ds.created_at.strftime('%d %b %Y') }}</p>
+            <div class="flex gap-2 mt-1.5">
+              <span class="text-[11px] bg-green-50 text-green-600 font-semibold px-2 py-0.5 rounded-full">+{{ ds.positif_count }}</span>
+              <span class="text-[11px] bg-red-50 text-red-600 font-semibold px-2 py-0.5 rounded-full">-{{ ds.negatif_count }}</span>
+              {% if ds.netral_count > 0 %}
+              <span class="text-[11px] bg-yellow-50 text-yellow-600 font-semibold px-2 py-0.5 rounded-full">~{{ ds.netral_count }}</span>
+              {% endif %}
+            </div>
+          </div>
+          <form method="POST" action="{{ url_for('upload.delete', dataset_id=ds.id) }}"
+                onsubmit="return confirm('Hapus dataset ini?')">
+            <button type="submit" class="text-gray-300 hover:text-red-500 transition mt-0.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+                <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+              </svg>
+            </button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-8 text-gray-300">
+        <svg class="w-10 h-10 mx-auto mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <p class="text-sm">Belum ada dataset</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Modal Konfirmasi Hapus Semua -->
+    <div id="modalDeleteAll" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
+      <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm">
+        <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+          </svg>
+        </div>
+        <h3 class="text-base font-extrabold text-center text-gray-800 mb-1">Hapus Semua Dataset?</h3>
+        <p class="text-sm text-gray-400 text-center mb-6">
+          Semua dataset dan seluruh data di dalamnya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.
+        </p>
+        <div class="flex gap-3">
+          <button onclick="closeModal()"
+                  class="flex-1 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-lg text-sm hover:bg-gray-50 transition">
+            Batal
+          </button>
+          <form method="POST" action="{{ url_for('upload.delete_all') }}" class="flex-1">
+            <button type="submit"
+                    class="w-full py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg text-sm transition">
+              Ya, Hapus Semua
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // ── Modal Hapus Semua ─────────────────────────────
+  function confirmDeleteAll() {
+    document.getElementById('modalDeleteAll').classList.remove('hidden');
+  }
+  function closeModal() {
+    document.getElementById('modalDeleteAll').classList.add('hidden');
+  }
+  // Klik area gelap di luar modal = tutup
+  document.getElementById('modalDeleteAll').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  let currentFile  = null;
+  let previewMeta  = null;
+
+  // ── Drag & Drop ──────────────────────────────────
+  function onDragOver(e)  { e.preventDefault(); document.getElementById('dropZone').classList.add('border-blue-400','bg-blue-50/40'); }
+  function onDragLeave(e) { document.getElementById('dropZone').classList.remove('border-blue-400','bg-blue-50/40'); }
+  function onDrop(e) {
+    e.preventDefault();
+    onDragLeave(e);
+    const f = e.dataTransfer.files[0];
+    if (f) setFile(f);
+  }
+  function onFileChange(input) { if (input.files[0]) setFile(input.files[0]); }
+
+  function setFile(f) {
+    currentFile = f;
+    document.getElementById('dropContent').classList.add('hidden');
+    document.getElementById('fileSelected').classList.remove('hidden');
+    document.getElementById('selectedFileName').textContent = f.name;
+    document.getElementById('selectedFileSize').textContent = (f.size / 1024).toFixed(1) + ' KB';
+    document.getElementById('btnPreview').disabled = false;
+    // Reset preview
+    document.getElementById('previewSection').classList.add('hidden');
+    document.getElementById('btnSave').classList.add('hidden');
+    hideError();
+  }
+
+  function clearFile(e) {
+    e.stopPropagation();
+    currentFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('dropContent').classList.remove('hidden');
+    document.getElementById('fileSelected').classList.add('hidden');
+    document.getElementById('btnPreview').disabled = true;
+    document.getElementById('previewSection').classList.add('hidden');
+    document.getElementById('btnSave').classList.add('hidden');
+    hideError();
+  }
+
+  // ── Preview & Validasi ────────────────────────────
+  async function doPreview() {
+    if (!currentFile) return;
+    hideError();
+    setBtnLoading('btnPreview', true, 'Memproses...');
+
+    const fd = new FormData();
+    fd.append('file', currentFile);
+
+    try {
+      const res  = await fetch('{{ url_for("upload.preview") }}', { method:'POST', body: fd });
+      const data = await res.json();
+
+      if (!data.success) {
+        showError(data.message);
+        setBtnLoading('btnPreview', false, 'Preview & Validasi');
+        return;
+      }
+
+      previewMeta = { text_col: data.text_col, label_col: data.label_col };
+
+      // Stats
+      document.getElementById('statTotal').textContent   = data.total_rows.toLocaleString();
+      document.getElementById('statPositif').textContent = (data.label_counts['positif'] || 0).toLocaleString();
+      document.getElementById('statNegatif').textContent = (data.label_counts['negatif'] || 0).toLocaleString();
+      document.getElementById('statNetral').textContent  = (data.label_counts['netral']  || 0).toLocaleString();
+
+      // Columns
+      document.getElementById('colText').textContent  = data.text_col;
+      document.getElementById('colLabel').textContent = data.label_col;
+
+      // Validation badge
+      document.getElementById('validationOk').classList.remove('hidden');
+      document.getElementById('validationMsg').textContent =
+        `Ditemukan ${data.total_rows} baris · Kolom "${data.text_col}" & "${data.label_col}" terdeteksi otomatis`;
+
+      // Table
+      const tbody = document.getElementById('previewTableBody');
+      tbody.innerHTML = '';
+      data.preview.forEach((row, i) => {
+        const label  = (row[data.label_col] || '').toLowerCase();
+        const badgeCls = label === 'positif' ? 'bg-green-50 text-green-600'
+                       : label === 'negatif' ? 'bg-red-50 text-red-600'
+                       : 'bg-yellow-50 text-yellow-600';
+        tbody.innerHTML += `
+          <tr class="hover:bg-gray-50/50">
+            <td class="px-4 py-2.5 text-gray-300 text-xs">${i+1}</td>
+            <td class="px-4 py-2.5 text-gray-700 text-xs max-w-xs">
+              <p class="line-clamp-2">${escHtml(row[data.text_col] || '')}</p>
+            </td>
+            <td class="px-4 py-2.5">
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${badgeCls}">${escHtml(row[data.label_col] || '')}</span>
+            </td>
+          </tr>`;
+      });
+
+      document.getElementById('previewSection').classList.remove('hidden');
+      document.getElementById('btnSave').classList.remove('hidden');
+
+      // Set nama otomatis jika kosong
+      if (!document.getElementById('namaDataset').value) {
+        document.getElementById('namaDataset').value = currentFile.name.replace(/\.[^.]+$/, '');
+      }
+
+    } catch (err) {
+      showError('Terjadi kesalahan jaringan. Coba lagi.');
+    }
+
+    setBtnLoading('btnPreview', false, 'Preview & Validasi');
+  }
+
+  // ── Simpan ──────────────────────────────────────
+  async function doSave() {
+    if (!currentFile || !previewMeta) return;
+    const nama = document.getElementById('namaDataset').value.trim();
+    if (!nama) { showError('Nama dataset wajib diisi.'); return; }
+
+    setBtnLoading('btnSave', true, 'Menyimpan...');
+
+    const fd = new FormData();
+    fd.append('file',          currentFile);
+    fd.append('nama_dataset',  nama);
+    fd.append('text_col',      previewMeta.text_col);
+    fd.append('label_col',     previewMeta.label_col);
+
+    try {
+      const res  = await fetch('{{ url_for("upload.save") }}', { method:'POST', body: fd });
+      const data = await res.json();
+
+      if (data.success) {
+        window.location.href = '{{ url_for("upload.index") }}';
+      } else {
+        showError(data.message);
+        setBtnLoading('btnSave', false, 'Simpan ke Database');
+      }
+    } catch (err) {
+      showError('Gagal menyimpan. Coba lagi.');
+      setBtnLoading('btnSave', false, 'Simpan ke Database');
+    }
+  }
+
+  // ── Helpers ──────────────────────────────────────
+  function showError(msg) {
+    const el = document.getElementById('alertError');
+    document.getElementById('alertErrorMsg').textContent = msg;
+    el.classList.remove('hidden');
+  }
+  function hideError() { document.getElementById('alertError').classList.add('hidden'); }
+
+  function setBtnLoading(id, loading, label) {
+    const btn = document.getElementById(id);
+    btn.disabled    = loading;
+    btn.textContent = loading ? label : label;
+    if (!loading) {
+      // Restore icons — just reload labels
+      if (id === 'btnPreview') btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ${label}`;
+      if (id === 'btnSave')    btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> ${label}`;
+    }
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+{% endblock %}
