@@ -1,7 +1,9 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, send_file
 from flask_login import login_required, current_user
 from models import db, Dataset, DataItem
 from utils.preprocessor import preprocess
+import pandas as pd
+import io
 
 preprocessing_bp = Blueprint('preprocessing', __name__)
 
@@ -78,12 +80,12 @@ def preview_data():
     if not dataset:
         return jsonify({'success': False, 'message': 'Dataset tidak ditemukan.'})
 
-    items = DataItem.query.filter_by(dataset_id=dataset_id).limit(20).all()
+    items = DataItem.query.filter_by(dataset_id=dataset_id).all()
     rows  = [{
-        'id'        : item.id,
-        'teks'      : item.teks,
-        'hasil'     : item.teks_preprocessed or '-',
-        'label'     : item.label,
+        'id'          : item.id,
+        'teks'        : item.teks,
+        'hasil'       : item.teks_preprocessed or '-',
+        'label'       : item.label,
         'preprocessed': item.is_preprocessed,
     } for item in items]
 
@@ -96,3 +98,48 @@ def preview_data():
         'total'     : total,
         'done_count': done_count,
     })
+
+
+@preprocessing_bp.route('/preprocessing/download', methods=['POST'])
+@login_required
+def download():
+    """Download hasil preprocessing sebagai CSV atau Excel."""
+    dataset_id = request.json.get('dataset_id')
+    fmt        = request.json.get('format', 'csv')
+
+    if not dataset_id:
+        return jsonify({'success': False, 'message': 'Dataset tidak dipilih.'})
+
+    dataset = Dataset.query.filter_by(id=dataset_id, user_id=current_user.id).first()
+    if not dataset:
+        return jsonify({'success': False, 'message': 'Dataset tidak ditemukan.'})
+
+    items = DataItem.query.filter_by(dataset_id=dataset_id).all()
+    if not items:
+        return jsonify({'success': False, 'message': 'Dataset kosong.'})
+
+    rows = [{
+        'teks_asli'        : item.teks,
+        'teks_preprocessed': item.teks_preprocessed or '',
+        'label'            : item.label,
+        'status'           : 'Sudah' if item.is_preprocessed else 'Belum',
+    } for item in items]
+
+    df        = pd.DataFrame(rows)
+    nama_file = dataset.nama.replace(' ', '_')
+
+    if fmt == 'excel':
+        buf = io.BytesIO()
+        with pd.ExcelWriter(buf, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Preprocessing')
+        buf.seek(0)
+        return send_file(buf,
+                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                         as_attachment=True,
+                         download_name=f'preprocessing_{nama_file}.xlsx')
+    else:
+        buf = io.BytesIO(df.to_csv(index=False, encoding='utf-8-sig').encode('utf-8-sig'))
+        buf.seek(0)
+        return send_file(buf, mimetype='text/csv',
+                         as_attachment=True,
+                         download_name=f'preprocessing_{nama_file}.csv')

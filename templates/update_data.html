@@ -1,0 +1,500 @@
+{% extends "base.html" %}
+{% block title %}Update Data – Analisis Sentimen{% endblock %}
+{% block page_title %}Update Data{% endblock %}
+
+{% block content %}
+
+<!-- ── Modal Peringatan ── -->
+<div id="modalPeringatan" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
+  <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+    <div class="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-5">
+      <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+      </svg>
+    </div>
+    <h3 class="text-xl font-extrabold text-center text-gray-800 mb-2">Perhatian!</h3>
+    <p class="text-sm text-gray-500 text-center leading-relaxed mb-3">
+      Fitur <b class="text-gray-700">Update Data</b> sebaiknya digunakan pada waktu yang tepat dan terencana.
+    </p>
+    <div class="bg-yellow-50 border border-yellow-100 rounded-xl p-4 mb-6 space-y-2 text-xs text-yellow-700">
+      <p class="font-bold uppercase tracking-wide text-yellow-600 mb-2">⚠️ Sebelum melanjutkan, pastikan:</p>
+      <p>• Data yang ditambahkan sudah dikurasi dan valid</p>
+      <p>• Update dilakukan secara berkala, bukan terus-menerus</p>
+      <p>• Setelah update, jalankan ulang <b>Preprocessing</b> dan <b>Klasifikasi SVM</b></p>
+      <p>• Penambahan data berlebihan dapat mempengaruhi akurasi model</p>
+    </div>
+    <div class="flex gap-3">
+      <a href="{{ url_for('dashboard.index') }}"
+         class="flex-1 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-xl text-sm text-center hover:bg-gray-50 transition">
+        Kembali
+      </a>
+      <button onclick="document.getElementById('modalPeringatan').remove()"
+              class="flex-1 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-xl text-sm transition">
+        Saya Mengerti, Lanjutkan
+      </button>
+    </div>
+  </div>
+</div>
+<div class="mb-7">
+  <h1 class="text-2xl font-extrabold tracking-tight">Update Data</h1>
+  <p class="text-gray-400 text-sm mt-1">Tambah data baru ke dataset yang sudah ada agar sentimen tetap up to date</p>
+</div>
+
+<!-- ── Tab ── -->
+<div class="flex gap-1 bg-gray-100 p-1 rounded-xl mb-6 w-fit">
+  <button onclick="switchTab('file')" id="tab-file"
+          class="px-5 py-2 rounded-lg text-sm font-semibold transition tab-btn">
+    📂 Upload File
+  </button>
+  <button onclick="switchTab('manual')" id="tab-manual"
+          class="px-5 py-2 rounded-lg text-sm font-semibold transition tab-btn">
+    ✏️ Input Manual
+  </button>
+</div>
+
+<!-- ══════════════════════════
+     TAB 1 — UPLOAD FILE
+══════════════════════════ -->
+<div id="panel-file">
+<div class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5">
+
+  <div class="space-y-5">
+
+    <!-- Pilih Dataset & File -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6">
+      <p class="font-bold mb-1">Gabungkan File ke Dataset</p>
+      <p class="text-gray-400 text-xs mb-5">Pilih dataset tujuan lalu upload file baru untuk digabungkan</p>
+
+      <!-- Pilih Dataset -->
+      <div class="mb-4">
+        <label class="block text-sm font-semibold mb-1.5">Dataset Tujuan</label>
+        <select id="fileDatasetSelect"
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition appearance-none bg-white">
+          <option value="">-- Pilih dataset --</option>
+          {% for ds in datasets %}
+          <option value="{{ ds.id }}">{{ ds.nama }} ({{ ds.total_rows }} baris)</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Drop Zone -->
+      <div id="dropZone"
+           class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-all"
+           onclick="document.getElementById('fileInput').click()"
+           ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+        <div id="dropContent">
+          <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <p class="font-semibold text-gray-700 text-sm mb-1">Drag & drop file ke sini</p>
+          <p class="text-gray-400 text-xs">atau <span class="text-blue-600 font-semibold">klik untuk pilih file</span></p>
+          <p class="text-gray-300 text-xs mt-2">CSV, XLSX, XLS</p>
+        </div>
+        <div id="fileSelected" class="hidden">
+          <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <p id="selectedFileName" class="font-semibold text-gray-800 text-sm mb-1"></p>
+          <p id="selectedFileSize" class="text-gray-400 text-xs"></p>
+          <button type="button" onclick="clearFile(event)" class="mt-2 text-xs text-red-500 hover:underline">Ganti file</button>
+        </div>
+      </div>
+      <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="hidden" onchange="onFileChange(this)"/>
+
+      <!-- Opsi duplikat -->
+      <label class="flex items-center gap-2.5 mt-4 cursor-pointer">
+        <input type="checkbox" id="skipDuplikat" checked class="accent-blue-600 w-4 h-4"/>
+        <span class="text-sm text-gray-600">Lewati data yang sudah ada (cegah duplikat)</span>
+      </label>
+
+      <!-- Alert -->
+      <div id="fileAlert" class="hidden mt-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium"></div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3 mt-5">
+        <button id="btnPreview" onclick="doPreview()"
+                class="flex items-center gap-2 px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg text-sm transition disabled:opacity-40" disabled>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          Preview
+        </button>
+        <button id="btnGabung" onclick="doGabung()"
+                class="hidden flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Gabungkan ke Dataset
+        </button>
+      </div>
+    </div>
+
+    <!-- Preview Section -->
+    <div id="previewSection" class="hidden bg-white border border-gray-200 rounded-xl p-6">
+      <div id="validationOk" class="hidden mb-4 flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+        <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <p id="validationMsg" class="text-xs text-green-700 font-medium"></p>
+      </div>
+
+      <div class="grid grid-cols-4 gap-3 mb-5">
+        <div class="bg-gray-50 rounded-lg p-3 text-center">
+          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Total Baris</p>
+          <p id="statTotal" class="text-xl font-extrabold text-gray-800">-</p>
+        </div>
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Positif</p>
+          <p id="statPositif" class="text-xl font-extrabold text-green-600">-</p>
+        </div>
+        <div class="bg-red-50 rounded-lg p-3 text-center">
+          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Negatif</p>
+          <p id="statNegatif" class="text-xl font-extrabold text-red-600">-</p>
+        </div>
+        <div class="bg-yellow-50 rounded-lg p-3 text-center">
+  <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Netral</p>
+  <p id="statNetral" class="text-xl font-extrabold text-yellow-500">-</p>
+</div>
+      </div>
+
+      <p class="text-sm font-bold mb-3">Preview Data <span id="previewCount" class="text-gray-400 font-normal text-xs"></span></p>
+      <div class="overflow-auto rounded-lg border border-gray-100 max-h-72">
+        <table class="w-full text-xs">
+          <thead class="sticky top-0">
+            <tr class="bg-gray-50 border-b border-gray-100">
+              <th class="px-3 py-2 text-left font-bold text-gray-400 uppercase w-8">#</th>
+              <th class="px-3 py-2 text-left font-bold text-gray-400 uppercase">Teks</th>
+              <th class="px-3 py-2 text-left font-bold text-gray-400 uppercase w-24">Label</th>
+            </tr>
+          </thead>
+          <tbody id="previewTableBody" class="divide-y divide-gray-50"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Panel -->
+  <div class="space-y-4">
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <p class="font-bold text-sm mb-3">Format File</p>
+      <div class="bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-600 mb-3">
+        <p class="text-blue-600 font-bold">teks,label</p>
+        <p>Pantai ini sangat indah,positif</p>
+        <p>Sampah berserakan,negatif</p>
+        <p>Biasa saja,netral</p>
+      </div>
+      <p class="text-xs text-gray-400">Nilai label: <b>positif</b>, <b>negatif</b>, <b>netral</b></p>
+    </div>
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+      <p class="text-sm font-bold text-blue-700 mb-2">💡 Tips</p>
+      <ul class="text-xs text-blue-600 space-y-1.5">
+        <li>• Aktifkan "Lewati duplikat" agar tidak ada data ganda</li>
+        <li>• Setelah digabung, jalankan preprocessing ulang</li>
+        <li>• Data baru otomatis masuk ke dataset yang dipilih</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ══════════════════════════
+     TAB 2 — INPUT MANUAL
+══════════════════════════ -->
+<div id="panel-manual" class="hidden">
+<div class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5">
+
+  <div class="space-y-5">
+    <div class="bg-white border border-gray-200 rounded-xl p-6">
+      <p class="font-bold mb-1">Input Data Manual</p>
+      <p class="text-gray-400 text-xs mb-5">Tambah satu data baru langsung lewat form</p>
+
+      <div class="mb-4">
+        <label class="block text-sm font-semibold mb-1.5">Dataset Tujuan</label>
+        <select id="manualDatasetSelect"
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition appearance-none bg-white">
+          <option value="">-- Pilih dataset --</option>
+          {% for ds in datasets %}
+          <option value="{{ ds.id }}">{{ ds.nama }} ({{ ds.total_rows }} baris)</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-semibold mb-1.5">Teks Ulasan</label>
+        <textarea id="manualTeks" rows="4"
+                  placeholder="Masukkan teks ulasan wisata pantai..."
+                  class="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition resize-none"></textarea>
+      </div>
+
+      <div class="mb-5">
+        <label class="block text-sm font-semibold mb-2">Label Sentimen</label>
+        <div class="flex gap-3">
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="manualLabel" value="positif" class="hidden peer"/>
+            <div class="peer-checked:bg-green-50 peer-checked:border-green-400 peer-checked:text-green-700
+                        border-2 border-gray-200 rounded-lg p-3 text-center text-sm font-semibold text-gray-400
+                        hover:border-green-300 transition">
+              😊 Positif
+            </div>
+          </label>
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="manualLabel" value="negatif" class="hidden peer"/>
+            <div class="peer-checked:bg-red-50 peer-checked:border-red-400 peer-checked:text-red-700
+                        border-2 border-gray-200 rounded-lg p-3 text-center text-sm font-semibold text-gray-400
+                        hover:border-red-300 transition">
+              😞 Negatif
+            </div>
+          </label>
+          <label class="flex-1 cursor-pointer">
+            <input type="radio" name="manualLabel" value="netral" class="hidden peer"/>
+            <div class="peer-checked:bg-yellow-50 peer-checked:border-yellow-400 peer-checked:text-yellow-700
+                        border-2 border-gray-200 rounded-lg p-3 text-center text-sm font-semibold text-gray-400
+                        hover:border-yellow-300 transition">
+              😐 Netral
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div id="manualAlert" class="hidden mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium"></div>
+
+      <button onclick="submitManual()"
+              class="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Tambah Data
+      </button>
+    </div>
+
+    <!-- Riwayat input manual -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6">
+      <p class="font-bold text-sm mb-3">Data Baru Ditambahkan</p>
+      <div id="manualLog" class="space-y-2 max-h-72 overflow-y-auto">
+        <p class="text-gray-300 text-xs text-center py-4">Belum ada data yang ditambahkan</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="space-y-4">
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <p class="font-bold text-sm mb-3">Info Dataset</p>
+      {% for ds in datasets %}
+      <div class="flex justify-between items-center py-2 border-b border-gray-50 last:border-0 text-sm">
+        <span class="text-gray-600 truncate max-w-[160px]">{{ ds.nama }}</span>
+        <span class="font-bold text-gray-700 shrink-0">{{ "{:,}".format(ds.total_rows) }} data</span>
+      </div>
+      {% else %}
+      <p class="text-gray-300 text-xs">Belum ada dataset</p>
+      {% endfor %}
+    </div>
+    <div class="bg-yellow-50 border border-yellow-100 rounded-xl p-5">
+      <p class="text-sm font-bold text-yellow-700 mb-2">⚠️ Perhatian</p>
+      <ul class="text-xs text-yellow-600 space-y-1.5">
+        <li>• Data yang ditambahkan belum dipreprocessing</li>
+        <li>• Jalankan preprocessing ulang setelah update</li>
+        <li>• Duplikat otomatis dicegah</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // ── Tab ──────────────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    ['file','manual'].forEach(t => {
+      document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
+      const btn = document.getElementById('tab-' + t);
+      if (t === tab) {
+        btn.classList.add('bg-white','shadow-sm','text-blue-600');
+        btn.classList.remove('text-gray-500');
+      } else {
+        btn.classList.remove('bg-white','shadow-sm','text-blue-600');
+        btn.classList.add('text-gray-500');
+      }
+    });
+  }
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.add('text-gray-500'));
+  switchTab('file');
+
+  // ── Drag & Drop ───────────────────────────────────────────────────────────
+  let currentFile  = null;
+  let previewMeta  = null;
+
+  function onDragOver(e)  { e.preventDefault(); document.getElementById('dropZone').classList.add('border-blue-400','bg-blue-50/40'); }
+  function onDragLeave()  { document.getElementById('dropZone').classList.remove('border-blue-400','bg-blue-50/40'); }
+  function onDrop(e)      { e.preventDefault(); onDragLeave(); if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); }
+  function onFileChange(i){ if (i.files[0]) setFile(i.files[0]); }
+
+  function setFile(f) {
+    currentFile = f;
+    document.getElementById('dropContent').classList.add('hidden');
+    document.getElementById('fileSelected').classList.remove('hidden');
+    document.getElementById('selectedFileName').textContent = f.name;
+    document.getElementById('selectedFileSize').textContent = (f.size/1024).toFixed(1) + ' KB';
+    document.getElementById('btnPreview').disabled = false;
+    document.getElementById('previewSection').classList.add('hidden');
+    document.getElementById('btnGabung').classList.add('hidden');
+    hideAlert('fileAlert');
+  }
+
+  function clearFile(e) {
+    e.stopPropagation();
+    currentFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('dropContent').classList.remove('hidden');
+    document.getElementById('fileSelected').classList.add('hidden');
+    document.getElementById('btnPreview').disabled = true;
+    document.getElementById('previewSection').classList.add('hidden');
+    document.getElementById('btnGabung').classList.add('hidden');
+  }
+
+  // ── Preview ───────────────────────────────────────────────────────────────
+  async function doPreview() {
+    if (!currentFile) return;
+    hideAlert('fileAlert');
+    document.getElementById('btnPreview').textContent = 'Memproses...';
+    document.getElementById('btnPreview').disabled = true;
+
+    const fd = new FormData();
+    fd.append('file', currentFile);
+
+    const res  = await fetch('{{ url_for("update_data.preview") }}', { method:'POST', body:fd });
+    const data = await res.json();
+
+    document.getElementById('btnPreview').innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Preview';
+    document.getElementById('btnPreview').disabled = false;
+
+    if (!data.success) { showAlert('fileAlert','danger', data.message); return; }
+
+    previewMeta = { text_col: data.text_col, label_col: data.label_col };
+    document.getElementById('statTotal').textContent   = data.total_rows.toLocaleString();
+    document.getElementById('statPositif').textContent = (data.label_counts['positif']||0).toLocaleString();
+    document.getElementById('statNegatif').textContent = (data.label_counts['negatif']||0).toLocaleString();
+    document.getElementById('statNetral').textContent  = (data.label_counts['netral']||0).toLocaleString();
+    document.getElementById('previewCount').textContent= `(${data.total_rows} baris)`;
+    document.getElementById('validationMsg').textContent = `${data.total_rows} baris · Kolom "${data.text_col}" & "${data.label_col}" terdeteksi`;
+    document.getElementById('validationOk').classList.remove('hidden');
+
+    const tbody = document.getElementById('previewTableBody');
+    tbody.innerHTML = '';
+    data.preview.forEach((row, i) => {
+      const lbl = (row[data.label_col]||'').toLowerCase();
+      const bc  = lbl==='positif'?'bg-green-50 text-green-600':lbl==='negatif'?'bg-red-50 text-red-600':'bg-yellow-50 text-yellow-600';
+      tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="px-3 py-2 text-gray-300">${i+1}</td>
+        <td class="px-3 py-2 text-gray-600 max-w-xs"><p class="line-clamp-2">${esc(row[data.text_col]||'')}</p></td>
+        <td class="px-3 py-2"><span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${bc}">${esc(row[data.label_col]||'')}</span></td></tr>`;
+    });
+
+    document.getElementById('previewSection').classList.remove('hidden');
+    document.getElementById('btnGabung').classList.remove('hidden');
+  }
+
+  // ── Gabung ────────────────────────────────────────────────────────────────
+  async function doGabung() {
+    const dsId = document.getElementById('fileDatasetSelect').value;
+    if (!dsId)  { showAlert('fileAlert','danger','Pilih dataset tujuan terlebih dahulu.'); return; }
+    if (!currentFile || !previewMeta) return;
+
+    document.getElementById('btnGabung').textContent = 'Menggabungkan...';
+    document.getElementById('btnGabung').disabled = true;
+
+    const fd = new FormData();
+    fd.append('file',          currentFile);
+    fd.append('dataset_id',    dsId);
+    fd.append('text_col',      previewMeta.text_col);
+    fd.append('label_col',     previewMeta.label_col);
+    fd.append('skip_duplikat', document.getElementById('skipDuplikat').checked ? 'true' : 'false');
+
+    const res  = await fetch('{{ url_for("update_data.gabung") }}', { method:'POST', body:fd });
+    const data = await res.json();
+
+    document.getElementById('btnGabung').innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Gabungkan ke Dataset';
+    document.getElementById('btnGabung').disabled = false;
+
+    showAlert('fileAlert', data.success ? 'success' : 'danger', data.message);
+    if (data.success) {
+      document.getElementById('previewSection').classList.add('hidden');
+      document.getElementById('btnGabung').classList.add('hidden');
+      clearFile({ stopPropagation: ()=>{} });
+      setTimeout(() => location.reload(), 1500);
+    }
+  }
+
+  // ── Input Manual ──────────────────────────────────────────────────────────
+  async function submitManual() {
+    const dsId  = document.getElementById('manualDatasetSelect').value;
+    const teks  = document.getElementById('manualTeks').value.trim();
+    const label = document.querySelector('input[name="manualLabel"]:checked')?.value;
+
+    if (!dsId)  { showAlert('manualAlert','danger','Pilih dataset tujuan.'); return; }
+    if (!teks)  { showAlert('manualAlert','danger','Teks ulasan tidak boleh kosong.'); return; }
+    if (!label) { showAlert('manualAlert','danger','Pilih label sentimen.'); return; }
+
+    const res  = await fetch('{{ url_for("update_data.manual") }}', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ dataset_id: parseInt(dsId), teks, label })
+    });
+    const data = await res.json();
+
+    showAlert('manualAlert', data.success ? 'success' : 'danger', data.message);
+
+    if (data.success) {
+      // Reset form
+      document.getElementById('manualTeks').value = '';
+      document.querySelectorAll('input[name="manualLabel"]').forEach(r => r.checked = false);
+
+      // Tambah ke log
+      const log = document.getElementById('manualLog');
+      if (log.querySelector('p')) log.innerHTML = '';
+      const lc  = label==='positif'?'bg-green-50 text-green-600':label==='negatif'?'bg-red-50 text-red-600':'bg-yellow-50 text-yellow-600';
+      log.insertAdjacentHTML('afterbegin', `
+        <div class="flex items-start justify-between gap-2 p-3 bg-gray-50 rounded-lg">
+          <div class="min-w-0">
+            <p class="text-xs text-gray-700 line-clamp-2">${esc(teks)}</p>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1 inline-block ${lc}">${label}</span>
+          </div>
+          <button onclick="hapusItem(${data.item.id}, this)" class="text-gray-300 hover:text-red-500 shrink-0 mt-0.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+            </svg>
+          </button>
+        </div>`);
+    }
+  }
+
+  // ── Hapus item dari log ───────────────────────────────────────────────────
+  async function hapusItem(id, btn) {
+    const res  = await fetch('{{ url_for("update_data.hapus_item") }}', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ item_id: id })
+    });
+    const data = await res.json();
+    if (data.success) btn.closest('.flex').remove();
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function showAlert(id, type, msg) {
+    const el = document.getElementById(id);
+    el.className = `flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium ${
+      type==='success' ? 'bg-green-50 border border-green-200 text-green-700'
+                       : 'bg-red-50 border border-red-200 text-red-700'}`;
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+  function hideAlert(id) { document.getElementById(id).classList.add('hidden'); }
+  function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+{% endblock %}

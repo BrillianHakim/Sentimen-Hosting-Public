@@ -13,8 +13,8 @@
   <!-- ── Kolom Kiri ── -->
   <div class="space-y-5">
 
-    <!-- Uji Coba Live -->
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <!-- Uji Coba Live (hidden per permintaan) -->
+    <div class="hidden">
       <p class="font-bold mb-0.5">Uji Coba Preprocessing</p>
       <p class="text-gray-400 text-xs mb-4">Masukkan teks untuk melihat hasil tiap tahapan secara langsung</p>
 
@@ -155,13 +155,31 @@
       <!-- Alert -->
       <div id="runAlert" class="hidden mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium"></div>
 
-      <button id="btnRun" onclick="runPreprocessing()"
-              class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition disabled:opacity-40" disabled>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <polygon points="5 3 19 12 5 21 5 3"/>
-        </svg>
-        Jalankan Preprocessing
-      </button>
+      <div class="flex gap-2 flex-wrap">
+        <button id="btnRun" onclick="runPreprocessing()"
+                class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition disabled:opacity-40" disabled>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Jalankan Preprocessing
+        </button>
+        <button id="btnDownloadCSV" onclick="downloadPreprocessing('csv')"
+                class="hidden flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download CSV
+        </button>
+        <button id="btnDownloadExcel" onclick="downloadPreprocessing('excel')"
+                class="hidden flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg text-sm transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download Excel
+        </button>
+      </div>
     </div>
 
     <!-- Tabel Perbandingan -->
@@ -169,14 +187,14 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <p class="font-bold">Perbandingan Sebelum & Sesudah</p>
-          <p class="text-gray-400 text-xs mt-0.5">Menampilkan 20 data pertama</p>
+          <p class="text-gray-400 text-xs mt-0.5">Semua data · scroll untuk melihat selengkapnya</p>
         </div>
         <span id="compBadge" class="text-xs font-semibold bg-green-50 text-green-600 px-3 py-1 rounded-full"></span>
       </div>
 
-      <div class="overflow-x-auto rounded-lg border border-gray-100">
+      <div class="overflow-auto rounded-lg border border-gray-100 max-h-[500px]">
         <table class="w-full text-xs">
-          <thead>
+          <thead class="sticky top-0">
             <tr class="bg-gray-50 border-b border-gray-100">
               <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase tracking-wide w-8">#</th>
               <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase tracking-wide">Teks Asli</th>
@@ -194,91 +212,6 @@
 
   <!-- ── Kolom Kanan ── -->
   <div class="space-y-5">
-
-    <!-- Alur Pipeline -->
-    <div class="bg-white border border-gray-200 rounded-xl p-5">
-      <p class="font-bold text-sm mb-4">Alur Pipeline</p>
-      <div class="space-y-0">
-
-        <div class="flex gap-3 items-center py-3 border-b border-gray-50">
-          <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center text-base shrink-0">🔡</div>
-          <div>
-            <p class="text-sm font-semibold text-gray-800">Case Folding</p>
-            <p class="text-[11px] text-gray-400">Lowercase semua teks</p>
-          </div>
-        </div>
-
-        <div class="flex gap-3 items-center py-3 border-b border-gray-50">
-          <div class="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center text-base shrink-0">🧹</div>
-          <div>
-            <p class="text-sm font-semibold text-gray-800">Cleaning</p>
-            <p class="text-[11px] text-gray-400">Hapus noise & karakter khusus</p>
-          </div>
-        </div>
-
-        <div class="flex gap-3 items-center py-3 border-b border-gray-50">
-          <div class="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center text-base shrink-0">📖</div>
-          <div>
-            <p class="text-sm font-semibold text-gray-800">Normalisasi Slang</p>
-            <p class="text-[11px] text-gray-400">Baku-kan kata tidak formal</p>
-          </div>
-        </div>
-
-        <div class="flex gap-3 items-center py-3 border-b border-gray-50">
-          <div class="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center text-base shrink-0">✂️</div>
-          <div>
-            <p class="text-sm font-semibold text-gray-800">Tokenisasi</p>
-            <p class="text-[11px] text-gray-400">Split ke token kata</p>
-          </div>
-        </div>
-
-        <div class="flex gap-3 items-center py-3 border-b border-gray-50">
-          <div class="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center text-base shrink-0">🚫</div>
-          <div>
-            <p class="text-sm font-semibold text-gray-800">Stopword Removal</p>
-            <p class="text-[11px] text-gray-400">Hapus kata tidak penting</p>
-          </div>
-        </div>
-
-        <div class="flex gap-3 items-center py-3">
-          <div class="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center text-base shrink-0">🌱</div>
-          <div>
-            <p class="text-sm font-semibold text-gray-800">Stemming</p>
-            <p class="text-[11px] text-gray-400">Bentuk dasar kata (Sastrawi)</p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Library -->
-    <!-- <div class="bg-white border border-gray-200 rounded-xl p-5">
-      <p class="font-bold text-sm mb-3">Library yang Digunakan</p>
-      <div class="space-y-2.5">
-        <div class="flex items-start gap-2.5">
-          <span class="w-2 h-2 rounded-full bg-blue-400 mt-1.5 shrink-0"></span>
-          <div>
-            <p class="text-sm font-semibold text-gray-700">Sastrawi</p>
-            <p class="text-[11px] text-gray-400">Stemming & Stopword Bahasa Indonesia</p>
-          </div>
-        </div>
-        <div class="flex items-start gap-2.5">
-          <span class="w-2 h-2 rounded-full bg-gray-400 mt-1.5 shrink-0"></span>
-          <div>
-            <p class="text-sm font-semibold text-gray-700">re (Regex)</p>
-            <p class="text-[11px] text-gray-400">Cleaning teks & pola emoji</p>
-          </div>
-        </div>
-        <div class="flex items-start gap-2.5">
-          <span class="w-2 h-2 rounded-full bg-purple-400 mt-1.5 shrink-0"></span>
-          <div>
-            <p class="text-sm font-semibold text-gray-700">Kamus Normalisasi</p>
-            <p class="text-[11px] text-gray-400">200+ kata slang & singkatan Indonesia</p>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
     <!-- Tips -->
     <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
       <div class="flex gap-2 mb-2">
@@ -344,6 +277,9 @@
     document.getElementById('btnRun').disabled = !id;
     document.getElementById('comparisonSection').classList.add('hidden');
     document.getElementById('datasetInfo').classList.add('hidden');
+    // Sembunyikan tombol download kalau ganti dataset
+    document.getElementById('btnDownloadCSV').classList.add('hidden');
+    document.getElementById('btnDownloadExcel').classList.add('hidden');
     if (!id) return;
     await loadPreviewData(id);
   }
@@ -362,7 +298,11 @@
     document.getElementById('infoPending').textContent = (data.total - data.done_count).toLocaleString();
     document.getElementById('datasetInfo').classList.remove('hidden');
 
-    if (data.done_count > 0) renderCompTable(data.rows, data.done_count, data.total);
+    if (data.done_count > 0) {
+      renderCompTable(data.rows, data.done_count, data.total);
+      document.getElementById('btnDownloadCSV').classList.remove('hidden');
+      document.getElementById('btnDownloadExcel').classList.remove('hidden');
+    }
   }
 
   // ── Jalankan Preprocessing ───────────────────────────────────────────
@@ -404,6 +344,9 @@
         alertEl.className = 'mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium bg-green-50 border border-green-200 text-green-700';
         alertEl.innerHTML = `<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> ${data.message}`;
         alertEl.classList.remove('hidden');
+        // Tampilkan tombol download
+        document.getElementById('btnDownloadCSV').classList.remove('hidden');
+        document.getElementById('btnDownloadExcel').classList.remove('hidden');
         await loadPreviewData(id);
       } else {
         alertEl.className = 'mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium bg-red-50 border border-red-200 text-red-700';
@@ -449,6 +392,40 @@
 
   function escHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function downloadPreprocessing(fmt) {
+    const id = document.getElementById('datasetSelect').value;
+    if (!id) return;
+
+    const btn = fmt === 'csv'
+      ? document.getElementById('btnDownloadCSV')
+      : document.getElementById('btnDownloadExcel');
+    btn.textContent = 'Menyiapkan...';
+    btn.disabled    = true;
+
+    const res = await fetch('{{ url_for("preprocessing.download") }}', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ dataset_id: parseInt(id), format: fmt })
+    });
+
+    if (res.ok) {
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = fmt === 'csv' ? 'hasil_preprocessing.csv' : 'hasil_preprocessing.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = fmt === 'csv'
+      ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download CSV'
+      : '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Excel';
   }
 </script>
 {% endblock %}

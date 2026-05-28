@@ -15,18 +15,10 @@
   <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/5"></div>
   <div class="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-white/5"></div>
 
-  <p class="text-xl font-extrabold mb-16">Analisis Sentimen</p>
+ 
   <h1 class="text-4xl font-extrabold leading-tight mb-5">Selamat Datang<br/>di Dashboard Riset</h1>
-  <!-- <p class="text-base opacity-80 leading-relaxed mb-12 max-w-sm">
-    Platform analisis sentimen berbasis SVM dengan TF-IDF Vectorization untuk penelitian akademik Anda.
-  </p>
-  <ul class="space-y-4">
-    {% for item in ['Klasifikasi SVM dengan akurasi tinggi', 'Preprocessing teks otomatis', 'Visualisasi hasil analisis', 'Export laporan penelitian'] %}
-    <li class="flex items-center gap-3 text-sm font-medium opacity-90">
-      <span class="w-2 h-2 rounded-full bg-white/70 shrink-0"></span>{{ item }}
-    </li>
-    {% endfor %}
-  </ul> -->
+ 
+ 
 </div>
 
 <!-- Right Panel -->
@@ -90,6 +82,14 @@
         Masuk
       </button>
     </form>
+
+    <div class="relative text-center my-6 text-gray-400 text-xs before:content-[''] before:absolute before:top-1/2 before:left-0 before:w-[44%] before:h-px before:bg-gray-200 after:content-[''] after:absolute after:top-1/2 after:right-0 after:w-[44%] after:h-px after:bg-gray-200">
+      atau
+    </div>
+    <p class="text-center text-sm text-gray-500">
+      Belum punya akun?
+      <a href="{{ url_for('auth.register') }}" class="text-blue-600 font-semibold hover:underline">Daftar sekarang</a>
+    </p>
 
 
   </div>

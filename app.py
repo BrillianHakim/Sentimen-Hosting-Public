@@ -28,16 +28,27 @@ def create_app(config_name='default'):
     from routes.dashboard import dashboard_bp
     from routes.upload import upload_bp
     from routes.preprocessing import preprocessing_bp
+    from routes.profile import profile_bp
+    from routes.svm import svm_bp
+    from routes.hasil_riset import hasil_riset_bp
+    from routes.update_data import update_data_bp
+    from routes.user_dashboard import user_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(upload_bp)
     app.register_blueprint(preprocessing_bp)
+    app.register_blueprint(profile_bp)
+    app.register_blueprint(svm_bp)
+    app.register_blueprint(hasil_riset_bp)
+    app.register_blueprint(update_data_bp)
+    app.register_blueprint(user_bp)
 
-    # Root redirect
+    # Root → langsung ke login
     @app.route('/')
     def index():
-        return redirect(url_for('dashboard.index'))
+        return redirect(url_for('auth.login'))
+
 
     # Create tables on first run
     with app.app_context():
@@ -54,7 +65,7 @@ def _seed_admin(app):
             admin = User(
                 name  = 'Bintang Brillian Hakim',
                 email = 'bintangbrillianhakim@gmail.com',
-                role  = 'Peneliti Akademik',
+                role  = 'Peneliti',
             )
             admin.set_password('Bintang12#')
             db.session.add(admin)

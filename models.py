@@ -80,3 +80,53 @@ class DataItem(db.Model):
     label             = db.Column(db.String(50))
     is_preprocessed   = db.Column(db.Boolean, default=False)
     created_at        = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# ─────────────────────────────────────────
+#  UserAnalisisFile (riwayat analisis file user)
+# ─────────────────────────────────────────
+class UserAnalisisFile(db.Model):
+    __tablename__ = 'user_analisis_file'
+
+    id           = db.Column(db.Integer, primary_key=True)
+    user_id      = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    nama_file    = db.Column(db.String(255))
+    total_data   = db.Column(db.Integer, default=0)
+    positif      = db.Column(db.Integer, default=0)
+    negatif      = db.Column(db.Integer, default=0)
+    netral       = db.Column(db.Integer, default=0)
+    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user         = db.relationship('User', backref=db.backref('analisis_files', lazy=True))
+
+
+# ─────────────────────────────────────────
+#  UserPrediksiTeks (riwayat prediksi teks user)
+# ─────────────────────────────────────────
+class UserPrediksiTeks(db.Model):
+    __tablename__ = 'user_prediksi_teks'
+
+    id           = db.Column(db.Integer, primary_key=True)
+    user_id      = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    teks         = db.Column(db.Text, nullable=False)
+    prediksi     = db.Column(db.String(50))
+    confidence   = db.Column(db.Float)
+    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user         = db.relationship('User', backref=db.backref('prediksi_teks', lazy=True))
+
+
+# ─────────────────────────────────────────
+#  UserAnalisisDetail (detail baris hasil analisis file user)
+# ─────────────────────────────────────────
+class UserAnalisisDetail(db.Model):
+    __tablename__ = 'user_analisis_detail'
+
+    id           = db.Column(db.Integer, primary_key=True)
+    analisis_id  = db.Column(db.Integer, db.ForeignKey('user_analisis_file.id'), nullable=False)
+    user_id      = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    teks         = db.Column(db.Text, nullable=False)
+    prediksi     = db.Column(db.String(50))
+    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+
+    analisis     = db.relationship('UserAnalisisFile', backref=db.backref('details', lazy=True, cascade='all, delete-orphan'))

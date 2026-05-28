@@ -135,10 +135,10 @@
       </div>
 
       <!-- Preview Table -->
-      <p class="text-sm font-bold mb-3">Preview Data (10 baris pertama)</p>
-      <div class="overflow-x-auto rounded-lg border border-gray-100">
+      <p class="text-sm font-bold mb-3">Preview Data <span id="previewCount" class="text-gray-400 font-normal text-xs"></span></p>
+      <div class="overflow-auto rounded-lg border border-gray-100 max-h-[500px]">
         <table class="w-full text-sm">
-          <thead>
+          <thead class="sticky top-0">
             <tr class="bg-gray-50 border-b border-gray-100">
               <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase tracking-wide w-8">#</th>
               <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase tracking-wide">Teks</th>
@@ -362,6 +362,9 @@
       document.getElementById('validationOk').classList.remove('hidden');
       document.getElementById('validationMsg').textContent =
         `Ditemukan ${data.total_rows} baris · Kolom "${data.text_col}" & "${data.label_col}" terdeteksi otomatis`;
+
+      // Judul preview
+      document.getElementById('previewCount').textContent = `(${data.total_rows} baris)`;
 
       // Table
       const tbody = document.getElementById('previewTableBody');

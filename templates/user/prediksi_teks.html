@@ -1,0 +1,180 @@
+{% extends "user/base_user.html" %}
+{% block title %}Prediksi Teks – Dashboard User{% endblock %}
+{% block page_title %}Prediksi Teks{% endblock %}
+
+{% block content %}
+<div class="mb-7">
+  <h1 class="text-2xl font-extrabold tracking-tight">Prediksi Teks</h1>
+  <p class="text-gray-400 text-sm mt-1">Masukkan ulasan wisata pantai untuk dianalisis sentimennya</p>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-5">
+  <div class="space-y-5">
+    <div class="bg-white border border-gray-200 rounded-xl p-6">
+      <p class="font-bold mb-1">Input Teks Ulasan</p>
+      <p class="text-gray-400 text-xs mb-4">Ketik atau paste ulasan wisata pantai di bawah ini</p>
+
+      <textarea id="inputTeks" rows="5"
+                placeholder="Contoh: Pantai ini sangat indah, pasirnya bersih dan pemandangannya menakjubkan..."
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition resize-none mb-3"></textarea>
+
+      <!-- Contoh cepat -->
+      <div class="flex gap-2 flex-wrap mb-4">
+        <p class="text-xs text-gray-400 w-full">Contoh cepat:</p>
+        <button onclick="setContoh('Pantai ini sangat indah dan bersih, recommended untuk keluarga!')"
+                class="text-xs px-3 py-1.5 bg-green-50 text-green-700 rounded-full hover:bg-green-100 transition">
+          😊 Positif
+        </button>
+        <button onclick="setContoh('Pantainya kotor sekali, banyak sampah dan fasilitasnya sangat buruk')"
+                class="text-xs px-3 py-1.5 bg-red-50 text-red-700 rounded-full hover:bg-red-100 transition">
+          😞 Negatif
+        </button>
+        <button onclick="setContoh('Pantainya biasa saja, tidak ada yang istimewa')"
+                class="text-xs px-3 py-1.5 bg-yellow-50 text-yellow-700 rounded-full hover:bg-yellow-100 transition">
+          😐 Netral
+        </button>
+      </div>
+
+      <div id="alertPred" class="hidden mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium bg-red-50 border border-red-200 text-red-700"></div>
+
+      <button onclick="runPrediksi()" id="btnPrediksi"
+              class="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Analisis Sentimen
+      </button>
+    </div>
+
+    <!-- Hasil -->
+    <div id="hasilSection" class="hidden bg-white border border-gray-200 rounded-xl p-6">
+      <p class="font-bold mb-5">Hasil Prediksi</p>
+      <div class="flex items-center justify-center gap-5 mb-6 p-6 bg-gray-50 rounded-xl">
+        <div id="hasilEmoji" class="text-6xl"></div>
+        <div>
+          <p id="hasilLabel" class="text-3xl font-extrabold capitalize"></p>
+          <p id="hasilConf" class="text-sm text-gray-400 mt-1"></p>
+        </div>
+      </div>
+      <div id="probaSection" class="space-y-2 mb-4"></div>
+      <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Teks setelah preprocessing</p>
+        <p id="teksPrep" class="text-xs text-gray-600 font-mono break-all"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="space-y-4">
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <p class="font-bold text-sm mb-3">Cara Kerja</p>
+      <div class="space-y-3">
+        <div class="flex gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 text-xs font-bold flex items-center justify-center shrink-0">1</span>
+          <div>
+            <p class="text-sm font-semibold">Input Teks</p>
+            <p class="text-xs text-gray-400">Ketik ulasan wisata pantai</p>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 text-xs font-bold flex items-center justify-center shrink-0">2</span>
+          <div>
+            <p class="text-sm font-semibold">Preprocessing</p>
+            <p class="text-xs text-gray-400">Teks dibersihkan & dinormalisasi otomatis</p>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 text-xs font-bold flex items-center justify-center shrink-0">3</span>
+          <div>
+            <p class="text-sm font-semibold">Prediksi SVM</p>
+            <p class="text-xs text-gray-400">Model klasifikasi sentimen teks kamu</p>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <span class="w-6 h-6 rounded-full bg-green-50 text-green-600 text-xs font-bold flex items-center justify-center shrink-0">✓</span>
+          <div>
+            <p class="text-sm font-semibold">Hasil + Probabilitas</p>
+            <p class="text-xs text-gray-400">Lihat sentimen & tingkat keyakinan model</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-green-50 border border-green-100 rounded-xl p-5">
+      <p class="text-sm font-bold text-green-700 mb-2">Label Sentimen</p>
+      <div class="space-y-2 text-xs">
+        <div class="flex items-center gap-2"><span>😊</span><span class="font-semibold text-green-700">Positif</span><span class="text-gray-400">— Ulasan menyenangkan</span></div>
+        <div class="flex items-center gap-2"><span>😞</span><span class="font-semibold text-red-600">Negatif</span><span class="text-gray-400">— Ulasan kurang baik</span></div>
+        <div class="flex items-center gap-2"><span>😐</span><span class="font-semibold text-yellow-600">Netral</span><span class="text-gray-400">— Ulasan biasa saja</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function setContoh(teks) {
+    document.getElementById('inputTeks').value = teks;
+    document.getElementById('hasilSection').classList.add('hidden');
+  }
+
+  async function runPrediksi() {
+    const teks = document.getElementById('inputTeks').value.trim();
+    if (!teks) {
+      const al = document.getElementById('alertPred');
+      al.textContent = 'Masukkan teks terlebih dahulu.';
+      al.classList.remove('hidden');
+      return;
+    }
+    document.getElementById('alertPred').classList.add('hidden');
+
+    const btn = document.getElementById('btnPrediksi');
+    btn.textContent = 'Menganalisis...';
+    btn.disabled = true;
+
+    const res  = await fetch('{{ url_for("user.proses_prediksi") }}', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ teks })
+    });
+    const data = await res.json();
+
+    btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Analisis Sentimen';
+    btn.disabled = false;
+
+    if (!data.success) {
+      const al = document.getElementById('alertPred');
+      al.textContent = data.message;
+      al.classList.remove('hidden');
+      return;
+    }
+
+    const emoji = data.prediksi==='positif'?'😊':data.prediksi==='negatif'?'😞':'😐';
+    const color = data.prediksi==='positif'?'text-green-600':data.prediksi==='negatif'?'text-red-500':'text-yellow-500';
+    const conf  = data.probabilitas[data.prediksi];
+
+    document.getElementById('hasilEmoji').textContent = emoji;
+    document.getElementById('hasilLabel').className   = `text-3xl font-extrabold capitalize ${color}`;
+    document.getElementById('hasilLabel').textContent = data.prediksi.charAt(0).toUpperCase() + data.prediksi.slice(1);
+    document.getElementById('hasilConf').textContent  = conf ? `Confidence: ${conf}%` : '';
+    document.getElementById('teksPrep').textContent   = data.teks_prep || '-';
+
+    const ps = document.getElementById('probaSection');
+    ps.innerHTML = '';
+    Object.entries(data.probabilitas).sort((a,b)=>b[1]-a[1]).forEach(([lbl, pct]) => {
+      const c = lbl==='positif'?'bg-green-500':lbl==='negatif'?'bg-red-500':'bg-yellow-400';
+      ps.innerHTML += `
+        <div class="mb-2">
+          <div class="flex justify-between text-xs mb-1">
+            <span class="font-semibold capitalize">${lbl}</span>
+            <span class="font-bold">${pct}%</span>
+          </div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full ${c} rounded-full" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+    });
+
+    document.getElementById('hasilSection').classList.remove('hidden');
+  }
+</script>
+{% endblock %}

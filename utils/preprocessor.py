@@ -19,14 +19,14 @@ _kamus = _load_kamus()
 KAMUS_NORMALISASI   = _kamus.KAMUS_NORMALISASI
 KATA_KUNCI_KEPUASAN = _kamus.KATA_KUNCI_KEPUASAN
 STOPWORD_TAMBAHAN   = _kamus.STOPWORD_TAMBAHAN
-KATA_LINDUNGI       = _kamus.KATA_LINDUNGI
+KATA_LINDUNGI       = set(_kamus.KATA_LINDUNGI)  # jadikan set agar bisa .add()
 
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 
 # ── Inisialisasi Sastrawi (sekali saja) ──────────────────────────────
 _stemmer          = None
-_stopword_remover = None
+_stopword_factory = None
 
 def _get_stemmer():
     global _stemmer
@@ -34,11 +34,13 @@ def _get_stemmer():
         _stemmer = StemmerFactory().create_stemmer()
     return _stemmer
 
-def _get_stopword_remover():
-    global _stopword_remover
-    if _stopword_remover is None:
-        _stopword_remover = StopWordRemoverFactory().create_stop_word_remover()
-    return _stopword_remover
+def _get_stopword_list():
+    """Ambil daftar stopword Sastrawi sebagai set."""
+    global _stopword_factory
+    if _stopword_factory is None:
+        factory = StopWordRemoverFactory()
+        _stopword_factory = set(factory.get_stop_words())
+    return _stopword_factory
 
 # ── Pola Emoji ────────────────────────────────────────────────────────
 EMOJI_PATTERN = re.compile(
@@ -64,7 +66,86 @@ EMOJI_PATTERN = re.compile(
     flags=re.UNICODE
 )
 
-# ── Tahapan (sama persis dengan kode skripsi) ─────────────────────────
+# ── Bigram Negatif ────────────────────────────────────────────────────
+# Harus IDENTIK dengan POLA_BIGRAM_NEGATIF di preprocessing_ulasan.py
+# Dijalankan SETELAH normalisasi, SEBELUM tokenisasi.
+#
+# Contoh:
+#   "tidak ramah" → "tidak_ramah"   (negatif)
+#   "tidak bau"   → "tidak_bau"     (positif: toilet tidak bau)
+#   "kurang bersih" → "kurang_bersih" (negatif)
+# ─────────────────────────────────────────────────────────────────────
+POLA_BIGRAM_NEGATIF = [
+    # ── tidak + kata sifat negatif ────────────────────────────
+    (r'\btidak\s+ramah\b',         'tidak_ramah'),
+    (r'\btidak\s+bersih\b',        'tidak_bersih'),
+    (r'\btidak\s+terawat\b',       'tidak_terawat'),
+    (r'\btidak\s+nyaman\b',        'tidak_nyaman'),
+    (r'\btidak\s+aman\b',          'tidak_aman'),
+    (r'\btidak\s+membantu\b',      'tidak_membantu'),
+    (r'\btidak\s+responsif\b',     'tidak_responsif'),
+    (r'\btidak\s+bagus\b',         'tidak_bagus'),
+    (r'\btidak\s+indah\b',         'tidak_indah'),
+    (r'\btidak\s+puas\b',          'tidak_puas'),
+    (r'\btidak\s+memuaskan\b',     'tidak_memuaskan'),
+    (r'\btidak\s+memadai\b',       'tidak_memadai'),
+    (r'\btidak\s+layak\b',         'tidak_layak'),
+    (r'\btidak\s+baik\b',          'tidak_baik'),
+    (r'\btidak\s+sopan\b',         'tidak_sopan'),
+    (r'\btidak\s+jelas\b',         'tidak_jelas'),
+    (r'\btidak\s+ada\b',           'tidak_ada'),
+    (r'\btidak\s+tersedia\b',      'tidak_tersedia'),
+    # ── tidak + kata sifat POSITIF (konteks justru positif) ───
+    (r'\btidak\s+bau\b',           'tidak_bau'),
+    (r'\btidak\s+kotor\b',         'tidak_kotor'),
+    (r'\btidak\s+sampah\b',        'tidak_sampah'),
+    (r'\btidak\s+berbahaya\b',     'tidak_berbahaya'),
+    (r'\btidak\s+macet\b',         'tidak_macet'),
+    (r'\btidak\s+ramai\b',         'tidak_ramai'),
+    (r'\btidak\s+mahal\b',         'tidak_mahal'),
+    (r'\btidak\s+jauh\b',          'tidak_jauh'),
+    # ── kurang + aspek ────────────────────────────────────────
+    (r'\bkurang\s+bersih\b',       'kurang_bersih'),
+    (r'\bkurang\s+terawat\b',      'kurang_terawat'),
+    (r'\bkurang\s+nyaman\b',       'kurang_nyaman'),
+    (r'\bkurang\s+ramah\b',        'kurang_ramah'),
+    (r'\bkurang\s+memadai\b',      'kurang_memadai'),
+    (r'\bkurang\s+baik\b',         'kurang_baik'),
+    (r'\bkurang\s+bagus\b',        'kurang_bagus'),
+    (r'\bkurang\s+memuaskan\b',    'kurang_memuaskan'),
+    (r'\bkurang\s+responsif\b',    'kurang_responsif'),
+    (r'\bkurang\s+layak\b',        'kurang_layak'),
+    # ── sangat + negatif ──────────────────────────────────────
+    (r'\bsangat\s+kotor\b',        'sangat_kotor'),
+    (r'\bsangat\s+buruk\b',        'sangat_buruk'),
+    (r'\bsangat\s+kecewa\b',       'sangat_kecewa'),
+    (r'\bsangat\s+mahal\b',        'sangat_mahal'),
+    (r'\bsangat\s+mengecewakan\b', 'sangat_mengecewakan'),
+    (r'\bsangat\s+jorok\b',        'sangat_jorok'),
+    # ── sangat + positif ──────────────────────────────────────
+    (r'\bsangat\s+bersih\b',       'sangat_bersih'),
+    (r'\bsangat\s+bagus\b',        'sangat_bagus'),
+    (r'\bsangat\s+indah\b',        'sangat_indah'),
+    (r'\bsangat\s+nyaman\b',       'sangat_nyaman'),
+    (r'\bsangat\s+ramah\b',        'sangat_ramah'),
+    (r'\bsangat\s+memuaskan\b',    'sangat_memuaskan'),
+    (r'\bsangat\s+membantu\b',     'sangat_membantu'),
+    (r'\bsangat\s+murah\b',        'sangat_murah'),
+    (r'\bsangat\s+jernih\b',       'sangat_jernih'),
+    (r'\bsangat\s+puas\b',         'sangat_puas'),
+]
+
+# Kompilasi regex sekali saat modul dimuat
+POLA_BIGRAM_COMPILED = [
+    (re.compile(pola, re.IGNORECASE), ganti)
+    for pola, ganti in POLA_BIGRAM_NEGATIF
+]
+
+# Daftarkan semua token bigram ke KATA_LINDUNGI secara otomatis
+for _, ganti in POLA_BIGRAM_NEGATIF:
+    KATA_LINDUNGI.add(ganti)
+
+# ── Tahapan preprocessing ─────────────────────────────────────────────
 
 def step_cleaning(teks: str) -> str:
     teks = str(teks)
@@ -80,14 +161,37 @@ def step_case_folding(teks: str) -> str:
 def step_normalisasi(teks: str) -> str:
     return ' '.join(KAMUS_NORMALISASI.get(k, k) for k in teks.split())
 
+def step_bigram_negatif(teks: str) -> str:
+    """
+    Gabungkan pasangan kata bermakna menjadi 1 token sebelum tokenisasi.
+    Token gabungan (underscore) dilindungi dari stemmer via KATA_LINDUNGI.
+    """
+    for pola, ganti in POLA_BIGRAM_COMPILED:
+        teks = pola.sub(ganti, teks)
+    return teks
+
 def step_tokenisasi(teks: str) -> list:
-    # split() setara word_tokenize untuk teks Indonesia bersih
     return teks.split()
 
 def step_hapus_stopword(tokens: list) -> list:
-    remover = _get_stopword_remover()
-    teks    = remover.remove(' '.join(tokens))
-    return [k for k in teks.split() if k not in STOPWORD_TAMBAHAN and len(k) > 1]
+    stopwords_sastrawi = _get_stopword_list()
+    hasil = []
+    for token in tokens:
+        # ✅ Selalu pertahankan kata yang dilindungi (termasuk bigram)
+        if token in KATA_LINDUNGI:
+            hasil.append(token)
+            continue
+        # ❌ Buang stopword tambahan
+        if token in STOPWORD_TAMBAHAN:
+            continue
+        # ❌ Buang stopword Sastrawi
+        if token in stopwords_sastrawi:
+            continue
+        # ❌ Buang token terlalu pendek
+        if len(token) <= 1:
+            continue
+        hasil.append(token)
+    return hasil
 
 def step_stemming(tokens: list) -> list:
     stemmer = _get_stemmer()
@@ -112,7 +216,11 @@ def preprocess(teks: str) -> dict:
     s3 = step_normalisasi(s2)
     hasil['slang_norm']   = s3
 
-    tokens                = step_tokenisasi(s3)
+    # ✅ Step baru: bigram negatif (setelah normalisasi, sebelum tokenisasi)
+    s4 = step_bigram_negatif(s3)
+    hasil['bigram_negatif'] = s4
+
+    tokens                = step_tokenisasi(s4)
     hasil['tokenisasi']   = tokens
 
     tokens_sw             = step_hapus_stopword(tokens)

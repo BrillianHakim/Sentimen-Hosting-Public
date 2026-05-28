@@ -67,8 +67,8 @@ def preview():
         label_counts = df[label_col].value_counts().to_dict()
         label_counts = {str(k): int(v) for k, v in label_counts.items()}
 
-        # Preview 10 baris pertama
-        preview_data = df[[text_col, label_col]].head(10).fillna('').to_dict(orient='records')
+        # Preview semua baris
+        preview_data = df[[text_col, label_col]].fillna('').to_dict(orient='records')
 
         return jsonify({
             'success'     : True,

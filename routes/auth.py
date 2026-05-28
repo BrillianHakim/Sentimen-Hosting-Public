@@ -5,10 +5,36 @@ from datetime import datetime
 
 auth_bp = Blueprint('auth', __name__)
 
-# Blokir akses /register
+# Blokir akses /register dari luar — hanya via link login
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    abort(404)
+    if current_user.is_authenticated:
+        return redirect(url_for('user.beranda'))
+
+    error = None
+    if request.method == 'POST':
+        name     = request.form.get('name', '').strip()
+        email    = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        confirm  = request.form.get('confirm_password', '')
+
+        if not all([name, email, password, confirm]):
+            error = 'Semua field wajib diisi.'
+        elif len(password) < 8:
+            error = 'Password minimal 8 karakter.'
+        elif password != confirm:
+            error = 'Konfirmasi password tidak cocok.'
+        elif User.query.filter_by(email=email).first():
+            error = 'Email sudah terdaftar.'
+        else:
+            new_user = User(name=name, email=email, role='User')
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Registrasi berhasil! Silakan login.', 'success')
+            return redirect(url_for('auth.login'))
+
+    return render_template('register.html', error=error)
 
 # ──────────────────────────────────────────────
 #  LOGIN
@@ -16,6 +42,8 @@ def register():
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
+        if current_user.role == 'User':
+            return redirect(url_for('user.beranda'))
         return redirect(url_for('dashboard.index'))
 
     error = None
@@ -35,9 +63,11 @@ def login():
                     login_user(user, remember=remember)
                     user.last_login = datetime.utcnow()
                     db.session.commit()
-                    next_page = request.args.get('next')
                     flash(f'Selamat datang, {user.name}!', 'success')
-                    return redirect(next_page or url_for('dashboard.index'))
+                    # Redirect berdasarkan role
+                    if user.role == 'User':
+                        return redirect(url_for('user.beranda'))
+                    return redirect(url_for('dashboard.index'))
             else:
                 error = 'Email atau password salah.'
 

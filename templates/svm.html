@@ -1,0 +1,503 @@
+{% extends "base.html" %}
+{% block title %}Klasifikasi SVM – Analisis Sentimen{% endblock %}
+{% block page_title %}Klasifikasi SVM{% endblock %}
+
+{% block content %}
+<div class="mb-7">
+  <h1 class="text-2xl font-extrabold tracking-tight">Klasifikasi SVM</h1>
+  <p class="text-gray-400 text-sm mt-1">Support Vector Machine (Kernel Linear) + SMOTE</p>
+</div>
+
+<!-- ── Tab Menu ── -->
+<div class="flex gap-1 bg-gray-100 p-1 rounded-xl mb-6 w-fit">
+  <button onclick="switchTab('db')" id="tab-db"
+          class="px-5 py-2 rounded-lg text-sm font-semibold transition tab-btn">
+    🗄️ Klasifikasi Data Web
+  </button>
+  <button onclick="switchTab('prediksi')" id="tab-prediksi"
+          class="px-5 py-2 rounded-lg text-sm font-semibold transition tab-btn">
+    🔍 Prediksi Teks Baru
+  </button>
+</div>
+
+<!-- ── Panel Hasil dari File (hidden) ── -->
+<div id="panel-hasil" class="hidden"></div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 2 — KLASIFIKASI DATA WEB
+══════════════════════════════════════════════════════════ -->
+<div id="panel-db" class="hidden">
+  <div class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5">
+
+    <div class="space-y-5">
+
+      <!-- Status model -->
+      <!-- <div class="bg-white border border-gray-200 rounded-xl p-6">
+        <p class="font-bold mb-4">Status Model</p>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500">model_svm_smote.pkl</span>
+            {% if stats.model_ready %}
+            <span class="text-xs font-semibold bg-green-50 text-green-600 px-3 py-1 rounded-full">✓ Ditemukan</span>
+            {% else %}
+            <span class="text-xs font-semibold bg-red-50 text-red-500 px-3 py-1 rounded-full">✗ Tidak ada</span>
+            {% endif %}
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500">tfidf_vectorizer.pkl</span>
+            {% if stats.vectorizer_ready %}
+            <span class="text-xs font-semibold bg-green-50 text-green-600 px-3 py-1 rounded-full">✓ Ditemukan</span>
+            {% else %}
+            <span class="text-xs font-semibold bg-red-50 text-red-500 px-3 py-1 rounded-full">✗ Tidak ada</span>
+            {% endif %}
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500">Data terpreprocessing</span>
+            <span class="text-xs font-semibold bg-blue-50 text-blue-600 px-3 py-1 rounded-full">{{ stats.total_db_preprocessed }} baris</span>
+          </div>
+        </div>
+      </div> -->
+
+      <!-- Pilih dataset & jalankan -->
+      <div class="bg-white border border-gray-200 rounded-xl p-6">
+        <p class="font-bold mb-1">Klasifikasi Dataset</p>
+        <p class="text-gray-400 text-xs mb-4">Pilih dataset yang sudah dipreprocessing lalu jalankan klasifikasi</p>
+
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-1.5">Pilih Dataset</label>
+          <select id="dbDatasetSelect"
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition appearance-none bg-white">
+            <option value="">-- Pilih dataset --</option>
+            {% for ds in stats.datasets %}
+            <option value="{{ ds.id }}">{{ ds.nama }} ({{ ds.total_rows }} baris)</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div id="dbAlert" class="hidden mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium"></div>
+
+        <div class="flex gap-2 flex-wrap">
+          <button id="btnKlasifikasiDB" onclick="runKlasifikasiDB()"
+                  class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition disabled:opacity-40">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Jalankan Klasifikasi
+          </button>
+          <button id="btnDownloadCSV" onclick="downloadHasil('csv')"
+                  class="hidden flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download CSV
+          </button>
+          <button id="btnDownloadExcel" onclick="downloadHasil('excel')"
+                  class="hidden flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg text-sm transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- Hasil klasifikasi DB -->
+      <div id="dbHasilSection" class="hidden bg-white border border-gray-200 rounded-xl p-6">
+        <p class="font-bold mb-4">Hasil Klasifikasi</p>
+        <div class="grid grid-cols-3 gap-3 mb-5">
+          <div class="bg-blue-50 rounded-lg p-3 text-center">
+            <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Akurasi</p>
+            <p id="dbAkurasi" class="text-xl font-extrabold text-blue-600">-</p>
+          </div>
+          <div class="bg-green-50 rounded-lg p-3 text-center">
+            <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Benar</p>
+            <p id="dbBenar" class="text-xl font-extrabold text-green-600">-</p>
+          </div>
+          <div class="bg-red-50 rounded-lg p-3 text-center">
+            <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Salah</p>
+            <p id="dbSalah" class="text-xl font-extrabold text-red-500">-</p>
+          </div>
+        </div>
+        <div class="overflow-auto rounded-lg border border-gray-100 max-h-[500px]">
+          <table class="w-full text-xs">
+            <thead class="sticky top-0">
+              <tr class="bg-gray-50 border-b border-gray-100">
+                <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase w-8">#</th>
+                <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase">Teks</th>
+                <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase w-24">Label Asli</th>
+                <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase w-24">Prediksi</th>
+                
+                <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase w-16">Status</th>
+              </tr>
+            </thead>
+            <tbody id="dbTabelBody" class="divide-y divide-gray-50"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info panel -->
+    <div class="space-y-5">
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <p class="font-bold text-sm mb-3">Alur Klasifikasi Web</p>
+        <div class="space-y-3">
+          {% for step, desc in [('1. Upload Data','Upload CSV/Excel di menu Upload Data'),('2. Preprocessing','Jalankan preprocessing di menu Preprocessing'),('3. Klasifikasi','Pilih dataset di sini → Jalankan'),('4. Hasil','Lihat prediksi & akurasi real-time')] %}
+          <div class="flex gap-3 items-start">
+            <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">{{ loop.index }}</span>
+            <div>
+              <p class="text-sm font-semibold">{{ step.split('.')[1].strip() }}</p>
+              <p class="text-xs text-gray-400">{{ desc }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+        <p class="text-sm font-bold text-blue-700 mb-2">⚠️ Perhatian</p>
+        <ul class="text-xs text-blue-600 space-y-1.5">
+          <li>• Dataset harus sudah dipreprocessing dulu</li>
+          <li>• Model & vectorizer harus ada di folder yang benar</li>
+          <li>• Hasil prediksi berdasarkan model yang sudah ditraining</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 3 — PREDIKSI TEKS BARU
+══════════════════════════════════════════════════════════ -->
+<div id="panel-prediksi" class="hidden">
+  <div class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5">
+
+    <div class="space-y-5">
+      <div class="bg-white border border-gray-200 rounded-xl p-6">
+        <p class="font-bold mb-1">Prediksi Teks Baru</p>
+        <p class="text-gray-400 text-xs mb-4">Masukkan teks ulasan untuk diprediksi sentimennya secara langsung</p>
+
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-1.5">Teks Ulasan</label>
+          <textarea id="inputTeks" rows="4" placeholder="Contoh: Pantai ini sangat bagus, pasirnya putih bersih dan pemandangannya indah sekali!"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition resize-none"></textarea>
+        </div>
+
+        <div id="predAlert" class="hidden mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium"></div>
+
+        <button onclick="runPrediksiTeks()"
+                class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Prediksi Sentimen
+        </button>
+      </div>
+
+      <!-- Hasil Prediksi -->
+      <div id="predHasilSection" class="hidden bg-white border border-gray-200 rounded-xl p-6">
+        <p class="font-bold mb-5">Hasil Prediksi</p>
+
+        <!-- Badge hasil -->
+        <div class="flex items-center justify-center mb-6">
+          <div id="predBadge" class="text-center">
+            <div id="predEmoji" class="text-6xl mb-3"></div>
+            <div id="predLabel" class="text-2xl font-extrabold mb-1"></div>
+            <div id="predConf" class="text-sm text-gray-400"></div>
+          </div>
+        </div>
+
+        <!-- Probabilitas per kelas -->
+        <div id="predProbaSection" class="mb-5"></div>
+
+        <!-- Preprocessing steps -->
+        <div class="bg-gray-50 rounded-lg p-4">
+          <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Teks setelah preprocessing</p>
+          <p id="predTeksPrep" class="text-xs text-gray-600 font-mono break-all"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="space-y-5">
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <p class="font-bold text-sm mb-3">Info Model</p>
+        <div class="space-y-2.5 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-400">Algoritma</span>
+            <span class="font-semibold">SVM Linear</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Balancing</span>
+            <span class="font-semibold">SMOTE</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Akurasi</span>
+            <span class="font-semibold text-blue-600">{{ stats.akurasi }}%</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Label Output</span>
+            <span class="font-semibold">positive/negative/neutral</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <p class="font-bold text-sm mb-3">Contoh Teks</p>
+        <div class="space-y-2">
+          <button onclick="setContoh('Pantai ini sangat indah dan bersih, recommended buat liburan keluarga!')"
+                  class="w-full text-left text-xs p-2.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition">
+            😊 "Pantai ini sangat indah dan bersih..."
+          </button>
+          <button onclick="setContoh('Pantainya kotor sekali, banyak sampah berserakan dan fasilitasnya sangat buruk')"
+                  class="w-full text-left text-xs p-2.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition">
+            😞 "Pantainya kotor sekali, banyak sampah..."
+          </button>
+          <button onclick="setContoh('Pantainya biasa saja, tidak ada yang istimewa')"
+                  class="w-full text-left text-xs p-2.5 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 rounded-lg transition">
+            😐 "Pantainya biasa saja, tidak ada..."
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // ── Tab switching ────────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    ['db','prediksi'].forEach(t => {
+      document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
+      const btn = document.getElementById('tab-' + t);
+      if (t === tab) {
+        btn.classList.add('bg-white','shadow-sm','text-blue-600');
+        btn.classList.remove('text-gray-500');
+      } else {
+        btn.classList.remove('bg-white','shadow-sm','text-blue-600');
+        btn.classList.add('text-gray-500');
+      }
+    });
+  }
+
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.add('text-gray-500'));
+  document.getElementById('tab-db').classList.add('bg-white','shadow-sm','text-blue-600');
+  document.getElementById('tab-db').classList.remove('text-gray-500');
+  document.getElementById('panel-db').classList.remove('hidden');
+
+  // ── Chart ───────────────────────────────────────────────────────────────────
+  let chartRendered = false;
+  function renderChart() {
+    new Chart(document.getElementById('distribusiChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels  : ['Positive','Negative','Neutral'],
+        datasets: [
+          { label:'Label Asli',     data: {{ stats.chart_label_data }},    backgroundColor:'rgba(37,99,235,.7)',  borderRadius:6 },
+          { label:'Hasil Prediksi', data: {{ stats.chart_prediksi_data }}, backgroundColor:'rgba(16,185,129,.7)', borderRadius:6 },
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position:'top', labels:{ font:{ size:11 } } } },
+        scales : { x:{ grid:{ display:false } }, y:{ grid:{ color:'#F3F4F6' }, beginAtZero:true } }
+      }
+    });
+    chartRendered = true;
+  }
+  renderChart();
+
+  // ── Tabel hasil prediksi file ────────────────────────────────────────────────
+  let currentPage = 1;
+  let totalPages  = 1;
+
+  async function loadTabel(page) {
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    const res  = await fetch('{{ url_for("svm.tabel_data") }}', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        page, filter_label: document.getElementById('filterLabel').value,
+        filter_benar: document.getElementById('filterBenar').value,
+      })
+    });
+    const data = await res.json();
+    if (!data.success) return;
+
+    totalPages = data.total_pages;
+    document.getElementById('totalRows').textContent = data.total.toLocaleString();
+    document.getElementById('paginationInfo').textContent = `Halaman ${page} dari ${totalPages} · ${data.total.toLocaleString()} data`;
+    document.getElementById('btnPrev').disabled = page <= 1;
+    document.getElementById('btnNext').disabled = page >= totalPages;
+
+    const tbody = document.getElementById('tabelBody');
+    tbody.innerHTML = '';
+    const start = (page - 1) * 50;
+    data.rows.forEach((row, i) => {
+      const lc = (row.label_corrected||'').toLowerCase();
+      const lp = (row.label_prediksi||'').toLowerCase();
+      const labelColor = lc==='positif'?'bg-blue-50 text-blue-600':lc==='negatif'?'bg-red-50 text-red-600':'bg-yellow-50 text-yellow-600';
+      const predColor  = lp==='positif'?'bg-blue-50 text-blue-600':lp==='negatif'?'bg-red-50 text-red-600':'bg-yellow-50 text-yellow-600';
+      const benar      = row.benar===true||row.benar==='True';
+      tbody.innerHTML += `
+        <tr class="hover:bg-gray-50 ${!benar?'bg-red-50/30':''}">
+          <td class="px-3 py-2.5 text-gray-300">${start+i+1}</td>
+          <td class="px-3 py-2.5 text-gray-600 max-w-xs"><p class="line-clamp-2">${esc(row.original_text||'')}</p></td>
+          <td class="px-3 py-2.5"><span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${labelColor}">${esc(row.label_corrected||'')}</span></td>
+          <td class="px-3 py-2.5"><span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${predColor}">${esc(row.label_prediksi||'')}</span></td>
+          <td class="px-3 py-2.5 text-gray-400">${esc(row.sumber||'')}</td>
+          <td class="px-3 py-2.5">${benar?'<span class="text-[10px] bg-green-50 text-green-600 font-semibold px-2 py-0.5 rounded-full">✓ Benar</span>':'<span class="text-[10px] bg-red-50 text-red-600 font-semibold px-2 py-0.5 rounded-full">✗ Salah</span>'}</td>
+        </tr>`;
+    });
+  }
+  loadTabel(1);
+
+  // ── Klasifikasi DB ───────────────────────────────────────────────────────────
+  async function runKlasifikasiDB() {
+    const id = document.getElementById('dbDatasetSelect').value;
+    if (!id) { showAlert('dbAlert', 'danger', 'Pilih dataset terlebih dahulu.'); return; }
+
+    const btn = document.getElementById('btnKlasifikasiDB');
+    btn.disabled = true; btn.textContent = 'Memproses...';
+
+    const res  = await fetch('{{ url_for("svm.klasifikasi_db") }}', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ dataset_id: parseInt(id) })
+    });
+    const data = await res.json();
+    btn.disabled = false; btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Jalankan Klasifikasi';
+
+    if (!data.success) { showAlert('dbAlert', 'danger', data.message); return; }
+
+    showAlert('dbAlert', 'success', data.message);
+    document.getElementById('dbAkurasi').textContent = data.akurasi + '%';
+    document.getElementById('dbBenar').textContent   = data.benar.toLocaleString();
+    document.getElementById('dbSalah').textContent   = data.salah.toLocaleString();
+
+    const tbody = document.getElementById('dbTabelBody');
+    tbody.innerHTML = '';
+    data.hasil.forEach((row, i) => {
+      const la = (row.label_asli||'').toLowerCase();
+      const lp = (row.prediksi||'').toLowerCase();
+      const lc = la==='positif'?'bg-blue-50 text-blue-600':la==='negatif'?'bg-red-50 text-red-600':'bg-yellow-50 text-yellow-600';
+      const pc = lp==='positif'?'bg-blue-50 text-blue-600':lp==='negatif'?'bg-red-50 text-red-600':'bg-yellow-50 text-yellow-600';
+      tbody.innerHTML += `
+        <tr class="hover:bg-gray-50 ${row.benar===false?'bg-red-50/30':''}">
+          <td class="px-3 py-2 text-gray-300">${i+1}</td>
+          <td class="px-3 py-2 text-gray-600 max-w-xs"><p class="line-clamp-2">${esc(row.teks)}</p></td>
+          <td class="px-3 py-2"><span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${lc}">${esc(row.label_asli||'-')}</span></td>
+          <td class="px-3 py-2"><span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${pc}">${esc(row.prediksi)}</span></td>
+          
+          <td class="px-3 py-2">${row.benar===true?'<span class="text-[10px] bg-green-50 text-green-600 font-semibold px-2 py-0.5 rounded-full">✓</span>':row.benar===false?'<span class="text-[10px] bg-red-50 text-red-600 font-semibold px-2 py-0.5 rounded-full">✗</span>':'-'}</td>
+        </tr>`;
+    });
+    document.getElementById('dbHasilSection').classList.remove('hidden');
+    document.getElementById('btnDownloadCSV').classList.remove('hidden');
+    document.getElementById('btnDownloadExcel').classList.remove('hidden');
+  }
+
+  async function downloadHasil(fmt) {
+    const id = document.getElementById('dbDatasetSelect').value;
+    if (!id) return;
+
+    const btn = fmt === 'csv'
+      ? document.getElementById('btnDownloadCSV')
+      : document.getElementById('btnDownloadExcel');
+    btn.textContent = 'Menyiapkan...';
+    btn.disabled = true;
+
+    const res = await fetch('{{ url_for("svm.download_hasil") }}', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ dataset_id: parseInt(id), format: fmt })
+    });
+
+    if (res.ok) {
+      const blob     = await res.blob();
+      const url      = URL.createObjectURL(blob);
+      const a        = document.createElement('a');
+      a.href         = url;
+      a.download     = fmt === 'csv' ? 'hasil_klasifikasi.csv' : 'hasil_klasifikasi.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else {
+      const data = await res.json();
+      showAlert('dbAlert', 'danger', data.message || 'Gagal download.');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = fmt === 'csv'
+      ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download CSV'
+      : '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Excel';
+  }
+
+  // ── Prediksi Teks Baru ───────────────────────────────────────────────────────
+  async function runPrediksiTeks() {
+    const teks = document.getElementById('inputTeks').value.trim();
+    if (!teks) { showAlert('predAlert', 'danger', 'Masukkan teks terlebih dahulu.'); return; }
+
+    const res  = await fetch('{{ url_for("svm.prediksi_teks") }}', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ teks })
+    });
+    const data = await res.json();
+
+    if (!data.success) { showAlert('predAlert', 'danger', data.message); return; }
+
+    document.getElementById('predAlert').classList.add('hidden');
+
+    const emoji = data.prediksi==='positif' ? '😊' : data.prediksi==='negatif' ? '😞' : '😐';
+    const color = data.prediksi==='positif' ? 'text-blue-600' : data.prediksi==='negatif' ? 'text-red-500' : 'text-yellow-500';
+    const conf  = data.probabilitas[data.prediksi];
+
+    document.getElementById('predEmoji').textContent = emoji;
+    document.getElementById('predLabel').className   = `text-2xl font-extrabold mb-1 ${color}`;
+    document.getElementById('predLabel').textContent = data.prediksi.toUpperCase();
+    document.getElementById('predConf').textContent  = conf ? `Confidence: ${conf}%` : '';
+    document.getElementById('predTeksPrep').textContent = data.teks_preprocessed || '-';
+
+    // Probabilitas bars
+    const section = document.getElementById('predProbaSection');
+    section.innerHTML = '<p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Probabilitas per kelas</p>';
+    Object.entries(data.probabilitas).sort((a,b)=>b[1]-a[1]).forEach(([lbl, pct]) => {
+      const c = lbl==='positive'?'bg-blue-500':lbl==='negative'?'bg-red-500':'bg-yellow-400';
+      section.innerHTML += `
+        <div class="mb-2">
+          <div class="flex justify-between text-xs mb-1">
+            <span class="font-semibold capitalize">${lbl}</span>
+            <span class="font-bold">${pct}%</span>
+          </div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full ${c} rounded-full transition-all duration-500" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+    });
+
+    document.getElementById('predHasilSection').classList.remove('hidden');
+  }
+
+  function setContoh(teks) {
+    document.getElementById('inputTeks').value = teks;
+    document.getElementById('predHasilSection').classList.add('hidden');
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────────
+  function showAlert(id, type, msg) {
+    const el  = document.getElementById(id);
+    const cls = type==='success'
+      ? 'flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium bg-green-50 border border-green-200 text-green-700'
+      : 'flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium bg-red-50 border border-red-200 text-red-700';
+    el.className = cls;
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+  function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+</script>
+{% endblock %}

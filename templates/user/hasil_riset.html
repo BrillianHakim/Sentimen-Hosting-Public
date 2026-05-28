@@ -1,0 +1,403 @@
+{% extends "user/base_user.html" %}
+{% block title %}Hasil Riset – Dashboard User{% endblock %}
+{% block page_title %}Hasil Riset{% endblock %}
+
+{% block content %}
+<div class="mb-7">
+  <h1 class="text-2xl font-extrabold tracking-tight">Hasil Riset</h1>
+  <p class="text-gray-400 text-sm mt-1">Riwayat aktivitas dan hasil analisis sentimen Anda</p>
+</div>
+
+<!-- Stat Aktivitas User -->
+<div class="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
+    <div class="w-11 h-11 bg-blue-50 rounded-lg flex items-center justify-center text-xl mb-4">📂</div>
+    <p class="text-[11px] font-bold tracking-widests text-gray-400 uppercase mb-2">File Dianalisis</p>
+    <p class="text-3xl font-extrabold text-blue-600">{{ stats.total_analisis }}</p>
+    <p class="text-xs text-gray-400 mt-1">total file</p>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
+    <div class="w-11 h-11 bg-purple-50 rounded-lg flex items-center justify-center text-xl mb-4">🔍</div>
+    <p class="text-[11px] font-bold tracking-widests text-gray-400 uppercase mb-2">Teks Diprediksi</p>
+    <p class="text-3xl font-extrabold text-purple-600">{{ stats.total_prediksi }}</p>
+    <p class="text-xs text-gray-400 mt-1">total prediksi</p>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
+    <div class="w-11 h-11 bg-green-50 rounded-lg flex items-center justify-center text-xl mb-4">📊</div>
+    <p class="text-[11px] font-bold tracking-widests text-gray-400 uppercase mb-2">Total Data Dianalisis</p>
+    <p class="text-3xl font-extrabold text-green-600">{{ "{:,}".format(stats.total_file_data) }}</p>
+    <p class="text-xs text-gray-400 mt-1">baris data</p>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
+    <div class="w-11 h-11 bg-blue-50 rounded-lg flex items-center justify-center text-xl mb-4">🎯</div>
+    <p class="text-[11px] font-bold tracking-widests text-gray-400 uppercase mb-2">Akurasi Model</p>
+    <p class="text-3xl font-extrabold text-blue-600">{{ stats.akurasi }}%</p>
+    <p class="text-xs text-gray-400 mt-1">SVM + SMOTE</p>
+  </div>
+</div>
+
+<!-- Riwayat Analisis File -->
+<div class="bg-white border border-gray-200 rounded-xl p-6 mb-5">
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <p class="font-bold mb-0.5">Riwayat Analisis File</p>
+      <p class="text-gray-400 text-xs">Daftar file yang pernah kamu analisis</p>
+    </div>
+    {% if stats.riwayat_file %}
+    <button onclick="hapusSemuaAnalisis()"
+            class="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-lg text-xs transition">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+      </svg>
+      Hapus Semua
+    </button>
+    {% endif %}
+  </div>
+
+  {% if stats.riwayat_file %}
+  <div class="overflow-auto rounded-lg border border-gray-100 max-h-72">
+    <table class="w-full text-sm">
+      <thead class="sticky top-0">
+        <tr class="bg-gray-50 border-b border-gray-100">
+          <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase w-8">#</th>
+          <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase">Nama File</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-20">Total</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-20">Positif</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-20">Negatif</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-20">Netral</th>
+          <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase w-32">Waktu</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-16">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tabelAnalisis" class="divide-y divide-gray-50">
+        {% for r in stats.riwayat_file %}
+        <tr id="analisis-row-{{ r.id }}" class="hover:bg-gray-50">
+          <td class="px-4 py-2.5 text-gray-400 text-xs">{{ loop.index }}</td>
+          <td class="px-4 py-2.5 font-medium text-gray-700">{{ r.nama_file }}</td>
+          <td class="px-4 py-2.5 text-center font-bold text-gray-700">{{ r.total_data }}</td>
+          <td class="px-4 py-2.5 text-center">
+            <span class="text-xs font-semibold bg-green-50 text-green-600 px-2 py-0.5 rounded-full">{{ r.positif }}</span>
+          </td>
+          <td class="px-4 py-2.5 text-center">
+            <span class="text-xs font-semibold bg-red-50 text-red-600 px-2 py-0.5 rounded-full">{{ r.negatif }}</span>
+          </td>
+          <td class="px-4 py-2.5 text-center">
+            <span class="text-xs font-semibold bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded-full">{{ r.netral }}</span>
+          </td>
+          <td class="px-4 py-2.5 text-xs text-gray-400">{{ r.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+          <td class="px-4 py-2.5 text-center">
+            <button onclick="hapusAnalisis({{ r.id }})"
+                    class="text-gray-300 hover:text-red-500 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+              </svg>
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div id="emptyAnalisis" class="text-center py-10 text-gray-300">
+    <p class="text-sm">Belum ada riwayat analisis file</p>
+    <a href="{{ url_for('user.analisis_file') }}" class="text-blue-500 text-xs hover:underline mt-1 inline-block">Analisis file sekarang →</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Riwayat Prediksi Teks -->
+<div class="bg-white border border-gray-200 rounded-xl p-6 mb-5">
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <p class="font-bold mb-0.5">Riwayat Prediksi Teks</p>
+      <p class="text-gray-400 text-xs">Daftar teks yang pernah kamu prediksi</p>
+    </div>
+    {% if stats.riwayat_teks %}
+    <button onclick="hapusSemuaPrediksi()"
+            class="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-lg text-xs transition">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+      </svg>
+      Hapus Semua
+    </button>
+    {% endif %}
+  </div>
+
+  {% if stats.riwayat_teks %}
+  <div class="overflow-auto rounded-lg border border-gray-100 max-h-72">
+    <table class="w-full text-sm">
+      <thead class="sticky top-0">
+        <tr class="bg-gray-50 border-b border-gray-100">
+          <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase w-8">#</th>
+          <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase">Teks</th>
+          <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase w-24">Prediksi</th>
+          <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase w-32">Waktu</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-16">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tabelPrediksi" class="divide-y divide-gray-50">
+        {% for r in stats.riwayat_teks %}
+        {% set color = 'bg-green-50 text-green-600' if r.prediksi == 'positif' else ('bg-red-50 text-red-600' if r.prediksi == 'negatif' else 'bg-yellow-50 text-yellow-600') %}
+        <tr id="prediksi-row-{{ r.id }}" class="hover:bg-gray-50">
+          <td class="px-4 py-2.5 text-gray-400 text-xs">{{ loop.index }}</td>
+          <td class="px-4 py-2.5 text-gray-600 max-w-xs"><p class="line-clamp-2 text-xs">{{ r.teks }}</p></td>
+          <td class="px-4 py-2.5">
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full {{ color }}">{{ r.prediksi }}</span>
+          </td>
+          
+          <td class="px-4 py-2.5 text-xs text-gray-400">{{ r.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+          <td class="px-4 py-2.5 text-center">
+            <button onclick="hapusPrediksi({{ r.id }})"
+                    class="text-gray-300 hover:text-red-500 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+              </svg>
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div id="emptyPrediksi" class="text-center py-10 text-gray-300">
+    <p class="text-sm">Belum ada riwayat prediksi teks</p>
+    <a href="{{ url_for('user.prediksi_teks') }}" class="text-blue-500 text-xs hover:underline mt-1 inline-block">Prediksi teks sekarang →</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Info Model -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-5">
+
+<!-- Kata Dominan per Sentimen -->
+{% if stats.total_file_data > 0 %}
+<div class="bg-white border border-gray-200 rounded-xl p-6 mb-5 xl:col-span-2">
+  <p class="font-bold mb-0.5">Kata Dominan dari Analisis File</p>
+  <p class="text-gray-400 text-xs mb-6">10 kata yang paling sering muncul pada setiap sentimen dari file yang kamu analisis</p>
+
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+    <!-- Positif -->
+    <div class="bg-green-50 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-2xl">😊</span>
+        <div>
+          <p class="font-bold text-green-700">Positif</p>
+          <p class="text-xs text-green-500">{{ stats.total_pred_positif }} prediksi</p>
+        </div>
+      </div>
+      {% if stats.top_positif %}
+      <div class="space-y-2">
+        {% set maks = stats.top_positif[0][1] %}
+        {% for kata, jumlah in stats.top_positif %}
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-green-700 w-24 shrink-0 truncate">{{ kata }}</span>
+          <div class="flex-1 h-5 bg-green-100 rounded-full overflow-hidden">
+            <div class="h-full bg-green-500 rounded-full flex items-center justify-end pr-2"
+                 style="width:{{ (jumlah / maks * 100)|round(0) }}%">
+              <span class="text-[10px] text-white font-bold">{{ jumlah }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-xs text-green-400 text-center py-6">Belum ada prediksi positif</p>
+      {% endif %}
+    </div>
+
+    <!-- Negatif -->
+    <div class="bg-red-50 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-2xl">😞</span>
+        <div>
+          <p class="font-bold text-red-700">Negatif</p>
+          <p class="text-xs text-red-400">{{ stats.total_pred_negatif }} prediksi</p>
+        </div>
+      </div>
+      {% if stats.top_negatif %}
+      <div class="space-y-2">
+        {% set maks = stats.top_negatif[0][1] %}
+        {% for kata, jumlah in stats.top_negatif %}
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-red-700 w-24 shrink-0 truncate">{{ kata }}</span>
+          <div class="flex-1 h-5 bg-red-100 rounded-full overflow-hidden">
+            <div class="h-full bg-red-500 rounded-full flex items-center justify-end pr-2"
+                 style="width:{{ (jumlah / maks * 100)|round(0) }}%">
+              <span class="text-[10px] text-white font-bold">{{ jumlah }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-xs text-red-400 text-center py-6">Belum ada prediksi negatif</p>
+      {% endif %}
+    </div>
+
+    <!-- Netral -->
+    <div class="bg-yellow-50 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-2xl">😐</span>
+        <div>
+          <p class="font-bold text-yellow-700">Netral</p>
+          <p class="text-xs text-yellow-500">{{ stats.total_pred_netral }} prediksi</p>
+        </div>
+      </div>
+      {% if stats.top_netral %}
+      <div class="space-y-2">
+        {% set maks = stats.top_netral[0][1] %}
+        {% for kata, jumlah in stats.top_netral %}
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-yellow-700 w-24 shrink-0 truncate">{{ kata }}</span>
+          <div class="flex-1 h-5 bg-yellow-100 rounded-full overflow-hidden">
+            <div class="h-full bg-yellow-400 rounded-full flex items-center justify-end pr-2"
+                 style="width:{{ (jumlah / maks * 100)|round(0) }}%">
+              <span class="text-[10px] text-white font-bold">{{ jumlah }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-xs text-yellow-400 text-center py-6">Belum ada prediksi netral</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+  <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <p class="font-bold mb-1">Proporsi Sentimen Analisis Saya</p>
+    <p class="text-gray-400 text-xs mb-4">Distribusi sentimen dari file yang pernah kamu analisis</p>
+    {% if stats.total_user > 0 %}
+    <div class="max-w-[300px] mx-auto">
+  <canvas id="chartPie"></canvas>
+</div>
+    {% else %}
+    <div class="text-center py-10 text-gray-300">
+      <p class="text-sm">Belum ada data analisis</p>
+      <a href="{{ url_for('user.analisis_file') }}" class="text-blue-500 text-xs hover:underline mt-1 inline-block">Analisis file sekarang →</a>
+    </div>
+    {% endif %}
+  </div>
+  <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <p class="font-bold mb-4">Info Model SVM</p>
+    <div class="space-y-3 text-sm">
+      <div class="flex justify-between py-2 border-b border-gray-50">
+        <span class="text-gray-400">Algoritma</span>
+        <span class="font-semibold">Support Vector Machine</span>
+      </div>
+      <div class="flex justify-between py-2 border-b border-gray-50">
+        <span class="text-gray-400">Kernel</span>
+        <span class="font-semibold">Linear</span>
+      </div>
+      <div class="flex justify-between py-2 border-b border-gray-50">
+        <span class="text-gray-400">Balancing</span>
+        <span class="font-semibold">SMOTE</span>
+      </div>
+      <div class="flex justify-between py-2 border-b border-gray-50">
+        <span class="text-gray-400">Vektorisasi</span>
+        <span class="font-semibold">TF-IDF</span>
+      </div>
+      <div class="flex justify-between py-2">
+        <span class="text-gray-400">Akurasi</span>
+        <span class="font-extrabold text-blue-600">{{ stats.akurasi }}%</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // ── Hapus Analisis File ───────────────────────────────────────────────────
+  async function hapusAnalisis(id) {
+    if (!confirm('Hapus riwayat analisis ini?')) return;
+    const res  = await fetch(`/user/hapus-analisis/${id}`, { method:'POST' });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('analisis-row-' + id).remove();
+    }
+  }
+
+  async function hapusSemuaAnalisis() {
+    if (!confirm('Hapus SEMUA riwayat analisis file? Tindakan ini tidak dapat dibatalkan.')) return;
+    const res  = await fetch('/user/hapus-analisis-semua', { method:'POST' });
+    const data = await res.json();
+    if (data.success) location.reload();
+  }
+
+  // ── Hapus Prediksi Teks ───────────────────────────────────────────────────
+  async function hapusPrediksi(id) {
+    if (!confirm('Hapus riwayat prediksi ini?')) return;
+    const res  = await fetch(`/user/hapus-prediksi/${id}`, { method:'POST' });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('prediksi-row-' + id).remove();
+    }
+  }
+
+  async function hapusSemuaPrediksi() {
+    if (!confirm('Hapus SEMUA riwayat prediksi teks? Tindakan ini tidak dapat dibatalkan.')) return;
+    const res  = await fetch('/user/hapus-prediksi-semua', { method:'POST' });
+    const data = await res.json();
+    if (data.success) location.reload();
+  }
+
+  // ── Chart Pie ─────────────────────────────────────────────────────────────
+  const pieData   = {{ stats.chart_values }};
+  const pieLabels = ['Positif', 'Negatif', 'Netral'];
+  const pieTotal  = pieData.reduce((a, b) => a + b, 0);
+  const pieCanvas = document.getElementById('chartPie');
+  if (pieCanvas && pieData.some(v => v > 0)) {
+    new Chart(pieCanvas.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels  : pieLabels,
+        datasets: [{
+          data           : pieData,
+          backgroundColor: ['rgba(22,163,74,.8)','rgba(220,38,38,.8)','rgba(234,179,8,.8)'],
+          borderWidth: 3, borderColor: '#fff',
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              font: { size: 12 },
+              generateLabels: function(chart) {
+                const data = chart.data;
+                return data.labels.map((label, i) => {
+                  const val = data.datasets[0].data[i];
+                  const pct = pieTotal > 0 ? ((val / pieTotal) * 100).toFixed(1) : 0;
+                  return {
+                    text        : label + ': ' + pct + '%',
+                    fillStyle   : data.datasets[0].backgroundColor[i],
+                    strokeStyle : '#fff',
+                    lineWidth   : 2,
+                    datasetIndex: 0,
+                    index       : i,
+                    hidden      : false,
+                  };
+                });
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                const val = ctx.parsed;
+                const pct = pieTotal > 0 ? ((val / pieTotal) * 100).toFixed(1) : 0;
+                return ' ' + ctx.label + ': ' + val + ' data (' + pct + '%)';
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

@@ -144,15 +144,61 @@ STOPWORD_TAMBAHAN = {
 }
 
 KATA_LINDUNGI = {
+    # ── Harga & Ekonomi ──────────────────────────────────────────
     'mahal', 'murah', 'gratis', 'terjangkau', 'sepadan', 'tiket',
     'harga', 'biaya', 'bayar', 'parkir', 'retribusi', 'tarif',
     '10ribu', '20ribu', '25ribu', '5ribu', '15ribu', '50ribu',
     '3ribu', '4ribu',
+
+    # ── Fasilitas ────────────────────────────────────────────────
     'fasilitas', 'toilet', 'warung', 'mushola', 'gazebo',
-    'bersih', 'kotor', 'sampah', 'kebersihan', 'terawat',
-    'pelayanan', 'petugas', 'ramah', 'sopan',
-    'pantai', 'pasir', 'ombak', 'jernih', 'pemandangan', 'suasana',
-    'panorama', 'sunrise', 'sunset', 'camping',
-    'akses', 'lokasi', 'medan',
-    'nyaman', 'rekomendasi', 'memuaskan', 'kecewa',
+    'terawat',
+
+    # ── Kebersihan ───────────────────────────────────────────────
+    'bersih', 'kotor', 'sampah', 'kebersihan', 'jorok', 'kumuh',
+
+    # ── Pelayanan ────────────────────────────────────────────────
+    'pelayanan', 'petugas', 'ramah', 'sopan', 'kasar',
+    'membantu', 'responsif', 'profesional',
+
+    # ── Kondisi Pantai ───────────────────────────────────────────
+    'pantai', 'pasir', 'ombak', 'jernih', 'keruh', 'pemandangan',
+    'suasana', 'panorama', 'sunrise', 'sunset', 'camping',
+    'snorkeling', 'diving',
+
+    # ── Aksesibilitas ────────────────────────────────────────────
+    'akses', 'lokasi', 'medan', 'rusak', 'macet',
+
+    # ── Sentimen Positif ─────────────────────────────────────────
+    'bagus', 'indah', 'keren', 'mantap', 'nyaman', 'memuaskan',
+    'menyenangkan', 'rekomendasi', 'menakjubkan', 'luar biasa',
+    'tenang', 'damai', 'romantis', 'asri', 'alami', 'jernih',
+    'sempurna', 'bahagia', 'senang', 'puas',
+
+    # ── Sentimen Negatif ─────────────────────────────────────────
+    'jelek', 'buruk', 'kecewa', 'mengecewakan', 'berbahaya',
+    'bahaya', 'ganas', 'agresif', 'sempit', 'padat',
+
+    # ══════════════════════════════════════════════════════════════
+    # ✅ TAMBAHAN BARU — Kata Negasi & Penguat Sentimen
+    # (sebelumnya dibuang Sastrawi, sekarang dilindungi)
+    # ══════════════════════════════════════════════════════════════
+
+    # Negasi — penentu utama sentimen negatif
+    'tidak', 'tak', 'bukan', 'belum', 'tanpa', 'jangan',
+
+    # Kuantifier negatif
+    'kurang', 'minim', 'minimnya',
+
+    # Penguat intensitas
+    'sangat', 'terlalu', 'sekali', 'banget', 'amat',
+
+    # Kata kondisi negatif yang sering dibuang stemmer
+    'berbahaya', 'membahayakan', 'menyebalkan', 'mengganggu',
+    'mengecewakan', 'memprihatinkan', 'menyedihkan',
+    'sembarangan', 'berserakan',
+
+    # Kata kondisi positif yang sering dibuang stemmer
+    'menenangkan', 'memukau', 'memanjakan', 'menakjubkan',
+    'menyenangkan', 'memuaskan', 'membahagiakan',
 }

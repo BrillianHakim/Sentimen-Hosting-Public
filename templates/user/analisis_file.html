@@ -1,0 +1,262 @@
+{% extends "user/base_user.html" %}
+{% block title %}Analisis File – Dashboard User{% endblock %}
+{% block page_title %}Analisis File{% endblock %}
+
+{% block content %}
+<div class="mb-7">
+  <h1 class="text-2xl font-extrabold tracking-tight">Analisis File</h1>
+  <p class="text-gray-400 text-sm mt-1">Upload file Excel atau CSV untuk dianalisis sentimennya secara otomatis</p>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-5">
+  <div class="space-y-5">
+
+    <!-- Upload -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6">
+      <p class="font-bold mb-1">Upload File Dataset</p>
+      <p class="text-gray-400 text-xs mb-4">Format: CSV atau Excel · Kolom wajib: teks/ulasan</p>
+
+      <div id="dropZone"
+           class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-all"
+           onclick="document.getElementById('fileInput').click()"
+           ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+        <div id="dropContent">
+          <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <p class="font-semibold text-gray-700 text-sm mb-1">Drag & drop file ke sini</p>
+          <p class="text-gray-400 text-xs">atau <span class="text-blue-600 font-semibold">klik untuk pilih file</span></p>
+          <p class="text-gray-300 text-xs mt-2">CSV, XLSX, XLS</p>
+        </div>
+        <div id="fileSelected" class="hidden">
+          <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <p id="fileName" class="font-semibold text-gray-800 text-sm mb-1"></p>
+          <p id="fileSize" class="text-gray-400 text-xs"></p>
+          <button type="button" onclick="clearFile(event)" class="mt-2 text-xs text-red-500 hover:underline">Ganti file</button>
+        </div>
+      </div>
+      <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="hidden" onchange="onFileChange(this)"/>
+
+      <div id="alertFile" class="hidden mt-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium"></div>
+
+      <button id="btnAnalisis" onclick="doAnalisis()"
+              class="mt-5 flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition disabled:opacity-40" disabled>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        Analisis Sekarang
+      </button>
+    </div>
+
+    <!-- Hasil -->
+    <div id="hasilSection" class="hidden bg-white border border-gray-200 rounded-xl p-6">
+
+      <!-- Stat -->
+      <div class="grid grid-cols-4 gap-3 mb-5">
+        <div class="bg-gray-50 rounded-lg p-3 text-center">
+          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Total</p>
+          <p id="statTotal" class="text-xl font-extrabold text-gray-800">-</p>
+        </div>
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Positif</p>
+          <p id="statPositif" class="text-xl font-extrabold text-green-600">-</p>
+        </div>
+        <div class="bg-red-50 rounded-lg p-3 text-center">
+          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Negatif</p>
+          <p id="statNegatif" class="text-xl font-extrabold text-red-600">-</p>
+        </div>
+        <div class="bg-yellow-50 rounded-lg p-3 text-center">
+          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Netral</p>
+          <p id="statNetral" class="text-xl font-extrabold text-yellow-500">-</p>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="mb-5">
+        <canvas id="chartHasil" height="120"></canvas>
+      </div>
+
+      <!-- Tombol Download -->
+      <div class="flex gap-2 mb-5">
+        <button onclick="downloadHasil('csv')"
+                class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg text-xs transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download CSV
+        </button>
+        <button onclick="downloadHasil('excel')"
+                class="flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold rounded-lg text-xs transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download Excel
+        </button>
+      </div>
+
+      <!-- Tabel -->
+      <p class="font-bold text-sm mb-3">Hasil Prediksi per Baris</p>
+      <div class="overflow-auto rounded-lg border border-gray-100 max-h-96">
+        <table class="w-full text-xs">
+          <thead class="sticky top-0">
+            <tr class="bg-gray-50 border-b border-gray-100">
+              <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase w-8">#</th>
+              <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase">Teks Ulasan</th>
+              <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase w-28">Prediksi Sentimen</th>
+              <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase w-20">Confidence</th>
+            </tr>
+          </thead>
+          <tbody id="tabelHasil" class="divide-y divide-gray-50"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Panel -->
+  <div class="space-y-4">
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <p class="font-bold text-sm mb-3">Format File</p>
+      <div class="bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-600 mb-3">
+        <p class="text-blue-600 font-bold">teks</p>
+        <p>Pantai ini sangat indah</p>
+        <p>Fasilitas kurang bagus</p>
+        <p>Biasa saja</p>
+      </div>
+      <p class="text-xs text-gray-400">Cukup <b>1 kolom teks</b> saja — tidak perlu kolom label</p>
+    </div>
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+      <p class="text-sm font-bold text-blue-700 mb-2">ℹ️ Cara Kerja</p>
+      <ul class="text-xs text-blue-600 space-y-1.5">
+        <li>1. Upload file CSV/Excel kamu</li>
+        <li>2. Sistem preprocessing teks otomatis</li>
+        <li>3. Model SVM prediksi setiap baris</li>
+        <li>4. Lihat & download hasilnya</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  let currentFile = null;
+  let hasilData   = [];
+
+  function onDragOver(e)  { e.preventDefault(); document.getElementById('dropZone').classList.add('border-blue-400','bg-blue-50/40'); }
+  function onDragLeave()  { document.getElementById('dropZone').classList.remove('border-blue-400','bg-blue-50/40'); }
+  function onDrop(e)      { e.preventDefault(); onDragLeave(); if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); }
+  function onFileChange(i){ if (i.files[0]) setFile(i.files[0]); }
+
+  function setFile(f) {
+    currentFile = f;
+    document.getElementById('dropContent').classList.add('hidden');
+    document.getElementById('fileSelected').classList.remove('hidden');
+    document.getElementById('fileName').textContent = f.name;
+    document.getElementById('fileSize').textContent = (f.size/1024).toFixed(1) + ' KB';
+    document.getElementById('btnAnalisis').disabled = false;
+    document.getElementById('hasilSection').classList.add('hidden');
+  }
+
+  function clearFile(e) {
+    e.stopPropagation();
+    currentFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('dropContent').classList.remove('hidden');
+    document.getElementById('fileSelected').classList.add('hidden');
+    document.getElementById('btnAnalisis').disabled = true;
+    document.getElementById('hasilSection').classList.add('hidden');
+  }
+
+  let chartInstance = null;
+
+  async function doAnalisis() {
+    if (!currentFile) return;
+    const btn = document.getElementById('btnAnalisis');
+    btn.textContent = 'Memproses...';
+    btn.disabled = true;
+
+    const fd = new FormData();
+    fd.append('file', currentFile);
+
+    const res  = await fetch('{{ url_for("user.proses_file") }}', { method:'POST', body:fd });
+    const data = await res.json();
+
+    btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Analisis Sekarang';
+    btn.disabled = false;
+
+    const al = document.getElementById('alertFile');
+    if (!data.success) {
+      al.className = 'mt-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium bg-red-50 border border-red-200 text-red-700';
+      al.textContent = data.message;
+      al.classList.remove('hidden');
+      return;
+    }
+    al.classList.add('hidden');
+
+    hasilData = data.hasil;
+    document.getElementById('statTotal').textContent   = data.total.toLocaleString();
+    document.getElementById('statPositif').textContent = (data.label_counts.positif||0).toLocaleString();
+    document.getElementById('statNegatif').textContent = (data.label_counts.negatif||0).toLocaleString();
+    document.getElementById('statNetral').textContent  = (data.label_counts.netral||0).toLocaleString();
+
+    // Chart
+    if (chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(document.getElementById('chartHasil').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels  : ['Positif','Negatif','Netral'],
+        datasets: [{
+          label: 'Jumlah',
+          data  : [data.label_counts.positif||0, data.label_counts.negatif||0, data.label_counts.netral||0],
+          backgroundColor: ['rgba(22,163,74,.8)','rgba(220,38,38,.8)','rgba(234,179,8,.8)'],
+          borderRadius: 6,
+        }]
+      },
+      options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } } }
+    });
+
+    // Tabel
+    const tbody = document.getElementById('tabelHasil');
+    tbody.innerHTML = '';
+    data.hasil.forEach((row, i) => {
+      const pc = row.prediksi==='positif'?'bg-green-50 text-green-600':row.prediksi==='negatif'?'bg-red-50 text-red-600':'bg-yellow-50 text-yellow-600';
+      tbody.innerHTML += `
+        <tr class="hover:bg-gray-50">
+          <td class="px-3 py-2 text-gray-300">${i+1}</td>
+          <td class="px-3 py-2 text-gray-600 max-w-xs"><p class="line-clamp-2">${esc(row.teks)}</p></td>
+          <td class="px-3 py-2"><span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${pc}">${esc(row.prediksi)}</span></td>
+          <td class="px-3 py-2 text-gray-500">${row.confidence ? row.confidence+'%' : '-'}</td>
+        </tr>`;
+    });
+
+    document.getElementById('hasilSection').classList.remove('hidden');
+  }
+
+  function downloadHasil(fmt) {
+    if (!hasilData.length) return;
+    if (fmt === 'csv') {
+      const header = 'teks,label_asli,prediksi,confidence\n';
+      const rows   = hasilData.map(r => `"${r.teks}","${r.label_asli}","${r.prediksi}","${r.confidence||''}"`).join('\n');
+      const blob   = new Blob(['\ufeff' + header + rows], { type:'text/csv;charset=utf-8;' });
+      const a      = document.createElement('a');
+      a.href       = URL.createObjectURL(blob);
+      a.download   = 'hasil_analisis.csv';
+      a.click();
+    } else {
+      alert('Download Excel: gunakan fitur Download CSV lalu buka di Excel.');
+    }
+  }
+
+  function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+{% endblock %}
