@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: sentimen-pantai
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:application
+    envVars:
+      - key: DATABASE_URL
+        value: mysql+pymysql://sql12831311:MWP9jQLHfm@sql12.freesqldatabase.com:3306/sql12831311
+      - key: SECRET_KEY
+        value: sentimen-pantai-secret-2026
+      - key: PYTHON_VERSION
+        value: 3.11.0

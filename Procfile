@@ -1,0 +1,1 @@
+web: python nltk_download.py && gunicorn app:application
