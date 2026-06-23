@@ -182,36 +182,7 @@
       </div>
     </div>
 
-    <!-- Status ringkas -->
-    <div class="mt-4 pt-4 border-t border-gray-100 space-y-2">
-      <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-3">Status Proses</p>
-
-      <div class="flex items-center justify-between text-sm">
-        <span class="text-gray-500">Upload Data</span>
-        {% if stats.total_data > 0 %}
-        <span class="text-[11px] font-semibold bg-green-50 text-green-600 px-2 py-0.5 rounded-full">✓ Selesai</span>
-        {% else %}
-        <span class="text-[11px] font-semibold bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">Belum</span>
-        {% endif %}
-      </div>
-
-      <div class="flex items-center justify-between text-sm">
-        <span class="text-gray-500">Preprocessing</span>
-        {% if stats.total_preprocessed > 0 and stats.total_preprocessed == stats.total_data %}
-        <span class="text-[11px] font-semibold bg-green-50 text-green-600 px-2 py-0.5 rounded-full">✓ Selesai</span>
-        {% elif stats.total_preprocessed > 0 %}
-        <span class="text-[11px] font-semibold bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded-full">Sebagian</span>
-        {% else %}
-        <span class="text-[11px] font-semibold bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">Belum</span>
-        {% endif %}
-      </div>
-
-      <div class="flex items-center justify-between text-sm">
-        <span class="text-gray-500">Klasifikasi SVM</span>
-        <span class="text-[11px] font-semibold bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">Belum</span>
-      </div>
-
-    </div>
+    
   </div>
 
 </div>

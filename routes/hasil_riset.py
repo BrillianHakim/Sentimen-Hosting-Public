@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, current_app
 from flask_login import login_required, current_user
-from models import db, Dataset, DataItem
+from models import db, Dataset, DataItem, HasilKlasifikasi
 from sqlalchemy import func
 from collections import Counter
 import json, os, re
@@ -85,6 +85,10 @@ def index():
     maks_prep      = max(panjang_prep) if panjang_prep else 0
     min_prep       = min(panjang_prep) if panjang_prep else 0
 
+    # Teks terpanjang & terpendek
+    item_terpanjang = max(prep_items, key=lambda x: len(x.teks_preprocessed.split()) if x.teks_preprocessed else 0) if prep_items else None
+    item_terpendek  = min(prep_items, key=lambda x: len(x.teks_preprocessed.split()) if x.teks_preprocessed else 999) if prep_items else None
+
     # Kata paling sering muncul (dari teks terpreprocessing)
     all_words = []
     for item in prep_items:
@@ -143,6 +147,14 @@ def index():
             report_text = f.read()
     metrics = _parse_metrics(report_text)
 
+    # ── Riwayat hasil klasifikasi SVM ─────────────────────────────────────────
+    riwayat_klasifikasi = HasilKlasifikasi.query\
+        .filter_by(user_id=current_user.id)\
+        .order_by(HasilKlasifikasi.created_at.desc()).all()
+
+    # Ambil yang terbaru untuk ditampilkan di stat cards
+    last_klasifikasi = riwayat_klasifikasi[0] if riwayat_klasifikasi else None
+
     stats = {
         # Label
         'total_data'        : total_data,
@@ -159,6 +171,8 @@ def index():
         'rata_asli'         : rata_asli,
         'maks_prep'         : maks_prep,
         'min_prep'          : min_prep,
+        'teks_terpanjang'   : item_terpanjang.teks[:300] if item_terpanjang else '-',
+        'teks_terpendek'    : item_terpendek.teks[:300]  if item_terpendek  else '-',
         'top_kata'          : top_kata,
         # Top kata per sentimen
         'top_positif'       : top_positif,
@@ -192,6 +206,16 @@ def index():
         'macro_f1'          : metrics['macro_f1'],
         'weighted_f1'       : metrics['weighted_f1'],
         'has_report'        : bool(report_text),
+        # Hasil Klasifikasi SVM
+        'riwayat_klasifikasi': riwayat_klasifikasi,
+        'last_klasifikasi'   : last_klasifikasi,
+        'total_diklasifikasi': sum(r.total_data for r in riwayat_klasifikasi),
+        'chart_svm_labels'   : json.dumps(['Positif', 'Negatif', 'Netral']),
+        'chart_svm_values'   : json.dumps([
+            sum(r.pred_positif for r in riwayat_klasifikasi),
+            sum(r.pred_negatif for r in riwayat_klasifikasi),
+            sum(r.pred_netral  for r in riwayat_klasifikasi),
+        ]),
         # Charts
         'chart_pie_labels'  : json.dumps(['Positif','Negatif','Netral']),
         'chart_pie_values'  : json.dumps([positif, negatif, netral]),

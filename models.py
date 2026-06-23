@@ -130,3 +130,25 @@ class UserAnalisisDetail(db.Model):
     created_at   = db.Column(db.DateTime, default=datetime.utcnow)
 
     analisis     = db.relationship('UserAnalisisFile', backref=db.backref('details', lazy=True, cascade='all, delete-orphan'))
+
+
+# ─────────────────────────────────────────
+#  HasilKlasifikasi (hasil klasifikasi SVM admin)
+# ─────────────────────────────────────────
+class HasilKlasifikasi(db.Model):
+    __tablename__ = 'hasil_klasifikasi'
+
+    id           = db.Column(db.Integer, primary_key=True)
+    user_id      = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    dataset_id   = db.Column(db.Integer, db.ForeignKey('datasets.id', ondelete='CASCADE'), nullable=False)
+    total_data   = db.Column(db.Integer, default=0)
+    benar        = db.Column(db.Integer, default=0)
+    salah        = db.Column(db.Integer, default=0)
+    akurasi      = db.Column(db.Float,   default=0)
+    pred_positif = db.Column(db.Integer, default=0)
+    pred_negatif = db.Column(db.Integer, default=0)
+    pred_netral  = db.Column(db.Integer, default=0)
+    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user         = db.relationship('User',    backref=db.backref('hasil_klasifikasi', lazy=True, cascade='all, delete-orphan'))
+    dataset      = db.relationship('Dataset', backref=db.backref('hasil_klasifikasi', lazy=True, cascade='all, delete-orphan'))

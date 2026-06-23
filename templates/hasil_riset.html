@@ -198,6 +198,21 @@
     {% if stats.rata_asli > 0 and stats.rata_prep > 0 %}
     <div class="bg-gray-50 rounded-lg p-3">
       <p class="text-xs font-semibold text-gray-600 mb-1">Reduksi Kata setelah Preprocessing</p>
+      <!-- Teks terpanjang & terpendek -->
+<!-- <div class="grid grid-cols-1 xl:grid-cols-2 gap-3 mt-4">
+  <div class="bg-purple-50 rounded-lg p-3">
+    <p class="text-[11px] font-bold text-purple-500 uppercase tracking-wide mb-1">
+      📝 Teks Terpanjang ({{ stats.maks_prep }} kata)
+    </p>
+    <p class="text-xs text-gray-600 leading-relaxed italic">"{{ stats.teks_terpanjang }}"</p>
+  </div>
+  <div class="bg-orange-50 rounded-lg p-3">
+    <p class="text-[11px] font-bold text-orange-500 uppercase tracking-wide mb-1">
+      📝 Teks Terpendek ({{ stats.min_prep }} kata)
+    </p>
+    <p class="text-xs text-gray-600 leading-relaxed italic">"{{ stats.teks_terpendek }}"</p>
+  </div>
+</div> -->
       <p class="text-xs text-gray-500">
         Rata-rata teks berkurang dari
         <b class="text-blue-600">{{ stats.rata_asli }} kata</b> menjadi
@@ -300,6 +315,80 @@
                    style="width:{{ (stats[fkey] * 100)|round(1) }}%"></div>
             </div>
           </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- ── Row: Hasil Klasifikasi SVM ── -->
+{% if stats.riwayat_klasifikasi %}
+<div class="bg-white border border-gray-200 rounded-xl p-6 mb-5">
+  <p class="font-bold mb-0.5">Hasil Klasifikasi SVM</p>
+  <p class="text-gray-400 text-xs mb-5">Ringkasan hasil prediksi sentimen dari klasifikasi SVM</p>
+
+  <!-- Stat cards -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-5">
+    <div class="bg-blue-50 rounded-lg p-3 text-center">
+      <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Total Diklasifikasi</p>
+      <p class="text-2xl font-extrabold text-blue-600">{{ "{:,}".format(stats.total_diklasifikasi) }}</p>
+    </div>
+    <div class="bg-green-50 rounded-lg p-3 text-center">
+      <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Pred. Positif</p>
+      <p class="text-2xl font-extrabold text-green-600">{{ "{:,}".format(stats.riwayat_klasifikasi | sum(attribute='pred_positif')) }}</p>
+    </div>
+    <div class="bg-red-50 rounded-lg p-3 text-center">
+      <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Pred. Negatif</p>
+      <p class="text-2xl font-extrabold text-red-600">{{ "{:,}".format(stats.riwayat_klasifikasi | sum(attribute='pred_negatif')) }}</p>
+    </div>
+    {% if stats.last_klasifikasi %}
+    <div class="bg-purple-50 rounded-lg p-3 text-center">
+      <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Akurasi Terakhir</p>
+      <p class="text-2xl font-extrabold text-purple-600">{{ stats.last_klasifikasi.akurasi }}%</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Riwayat tabel -->
+  <div class="overflow-auto rounded-lg border border-gray-100 max-h-64">
+    <table class="w-full text-sm">
+      <thead class="sticky top-0">
+        <tr class="bg-gray-50 border-b border-gray-100">
+          <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase w-8">#</th>
+          <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase">Dataset</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-20">Total</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-20">Benar</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-20">Salah</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-24">Akurasi</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-20">Positif</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-20">Negatif</th>
+          <th class="px-4 py-2.5 text-center text-xs font-bold text-gray-400 uppercase w-20">Netral</th>
+          <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase w-32">Waktu</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        {% for r in stats.riwayat_klasifikasi %}
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-2.5 text-gray-400 text-xs">{{ loop.index }}</td>
+          <td class="px-4 py-2.5 font-medium text-gray-700 text-xs">{{ r.dataset.nama }}</td>
+          <td class="px-4 py-2.5 text-center font-bold text-gray-700">{{ r.total_data }}</td>
+          <td class="px-4 py-2.5 text-center">
+            <span class="text-xs font-semibold bg-green-50 text-green-600 px-2 py-0.5 rounded-full">{{ r.benar }}</span>
+          </td>
+          <td class="px-4 py-2.5 text-center">
+            <span class="text-xs font-semibold bg-red-50 text-red-600 px-2 py-0.5 rounded-full">{{ r.salah }}</span>
+          </td>
+          <td class="px-4 py-2.5 text-center">
+            <span class="font-bold {% if r.akurasi >= 90 %}text-green-600{% elif r.akurasi >= 70 %}text-yellow-500{% else %}text-red-500{% endif %}">
+              {{ r.akurasi }}%
+            </span>
+          </td>
+          <td class="px-4 py-2.5 text-center text-xs text-gray-500">{{ r.pred_positif }}</td>
+          <td class="px-4 py-2.5 text-center text-xs text-gray-500">{{ r.pred_negatif }}</td>
+          <td class="px-4 py-2.5 text-center text-xs text-gray-500">{{ r.pred_netral }}</td>
+          <td class="px-4 py-2.5 text-xs text-gray-400">{{ r.created_at.strftime('%d %b %Y, %H:%M') }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -507,11 +596,11 @@
   new Chart(document.getElementById('chartDataset').getContext('2d'), {
     type: 'bar',
     data: {
-      labels  : {{ stats.chart_ds_labels }},
+      labels  : {{ stats.chart_ds_labels | safe }},
       datasets: [
-        { label:'Positif', data: {{ stats.chart_ds_positif }}, backgroundColor:'rgba(22,163,74,.8)',  borderRadius:6 },
-        { label:'Negatif', data: {{ stats.chart_ds_negatif }}, backgroundColor:'rgba(220,38,38,.8)',  borderRadius:6 },
-        { label:'Netral',  data: {{ stats.chart_ds_netral }},  backgroundColor:'rgba(234,179,8,.8)',  borderRadius:6 },
+        { label:'Positif', data: {{ stats.chart_ds_positif | safe }}, backgroundColor:'rgba(22,163,74,.8)',  borderRadius:6 },
+        { label:'Negatif', data: {{ stats.chart_ds_negatif | safe }}, backgroundColor:'rgba(220,38,38,.8)',  borderRadius:6 },
+        { label:'Netral',  data: {{ stats.chart_ds_netral  | safe}},  backgroundColor:'rgba(234,179,8,.8)',  borderRadius:6 },
       ]
     },
     options: {

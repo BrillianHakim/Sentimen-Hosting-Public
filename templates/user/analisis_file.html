@@ -113,7 +113,7 @@
               <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase w-8">#</th>
               <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase">Teks Ulasan</th>
               <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase w-28">Prediksi Sentimen</th>
-              <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase w-20">Confidence</th>
+              
             </tr>
           </thead>
           <tbody id="tabelHasil" class="divide-y divide-gray-50"></tbody>
@@ -235,7 +235,7 @@
           <td class="px-3 py-2 text-gray-300">${i+1}</td>
           <td class="px-3 py-2 text-gray-600 max-w-xs"><p class="line-clamp-2">${esc(row.teks)}</p></td>
           <td class="px-3 py-2"><span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${pc}">${esc(row.prediksi)}</span></td>
-          <td class="px-3 py-2 text-gray-500">${row.confidence ? row.confidence+'%' : '-'}</td>
+          
         </tr>`;
     });
 
