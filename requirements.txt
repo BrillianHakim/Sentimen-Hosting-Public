@@ -10,3 +10,11 @@ Flask-Bcrypt==1.0.1
 email-validator==2.1.1
 pandas==2.2.2
 openpyxl==3.1.2
+
+gunicorn==21.2.0
+scikit-learn==1.4.2
+imbalanced-learn==0.12.3
+joblib==1.4.2
+nltk==3.8.1
+PySastrawi==1.2.0
+numpy==1.26.4
