@@ -49,7 +49,6 @@ def create_app(config_name='default'):
     def index():
         return redirect(url_for('auth.login'))
 
-
     # Create tables on first run
     with app.app_context():
         db.create_all()
@@ -72,6 +71,9 @@ def _seed_admin(app):
             db.session.commit()
             print('✅  Akun dibuat → email: bintangbrillianhakim@gmail.com | password: Bintang12#')
 
+
+# Untuk gunicorn
+application = create_app(os.environ.get('FLASK_ENV', 'production'))
 
 if __name__ == '__main__':
     env = os.environ.get('FLASK_ENV', 'development')
