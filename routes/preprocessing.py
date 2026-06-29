@@ -67,6 +67,7 @@ def run():
             'success'  : True,
             'done'     : True,
             'processed': total,
+            'total'    : total,
             'message'  : f'Semua {total} data selesai dipreproses!',
         })
 
