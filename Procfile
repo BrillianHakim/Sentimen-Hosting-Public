@@ -1,1 +1,1 @@
-web: python nltk_download.py && gunicorn app:application
+web: python nltk_download.py && gunicorn app:application --timeout 300 --workers 2
