@@ -314,6 +314,76 @@
     document.getElementById('progressWrap').classList.remove('hidden');
     document.getElementById('runAlert').classList.add('hidden');
 
+    const bar     = document.getElementById('progressBar');
+    const pctEl   = document.getElementById('progressPct');
+    const labelEl = document.getElementById('progressLabel');
+    labelEl.textContent = 'Memproses data...';
+
+    const alertEl = document.getElementById('runAlert');
+
+    try {
+      let done = false;
+      let processed = 0;
+      let total = 1;
+
+      while (!done) {
+        const res  = await fetch('{{ url_for("preprocessing.run") }}', {
+          method : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body   : JSON.stringify({ dataset_id: parseInt(id) })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+          alertEl.className = 'mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium bg-red-50 border border-red-200 text-red-700';
+          alertEl.innerHTML = `<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg> ${data.message}`;
+          alertEl.classList.remove('hidden');
+          break;
+        }
+
+        processed = data.processed;
+        total     = data.total;
+        done      = data.done;
+
+        // Update progress bar
+        const pct = total > 0 ? Math.round((processed / total) * 100) : 0;
+        bar.style.width   = pct + '%';
+        pctEl.textContent = pct + '%';
+        labelEl.textContent = `Memproses ${processed} dari ${total} data...`;
+      }
+
+      if (done) {
+        bar.style.width   = '100%';
+        pctEl.textContent = '100%';
+        labelEl.textContent = 'Selesai!';
+
+        alertEl.className = 'mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium bg-green-50 border border-green-200 text-green-700';
+        alertEl.innerHTML = `<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Semua ${total} data berhasil dipreproses!`;
+        alertEl.classList.remove('hidden');
+
+        document.getElementById('btnDownloadCSV').classList.remove('hidden');
+        document.getElementById('btnDownloadExcel').classList.remove('hidden');
+        await loadPreviewData(id);
+      }
+
+    } catch(e) {
+      const alertEl = document.getElementById('runAlert');
+      alertEl.className = 'mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium bg-red-50 border border-red-200 text-red-700';
+      alertEl.innerHTML = 'Terjadi kesalahan jaringan.';
+      alertEl.classList.remove('hidden');
+    }
+
+    document.getElementById('btnRun').disabled = false;
+    setTimeout(() => document.getElementById('progressWrap').classList.add('hidden'), 3000);
+  }
+    const id = document.getElementById('datasetSelect').value;
+    if (!id) return;
+
+    document.getElementById('btnRun').disabled = true;
+    document.getElementById('progressWrap').classList.remove('hidden');
+    document.getElementById('runAlert').classList.add('hidden');
+
     let pct = 0;
     const bar     = document.getElementById('progressBar');
     const pctEl   = document.getElementById('progressPct');

@@ -42,6 +42,53 @@ def sample():
 @preprocessing_bp.route('/preprocessing/run', methods=['POST'])
 @login_required
 def run():
+    """Proses dataset per batch 50 data."""
+    dataset_id = request.json.get('dataset_id')
+    offset     = request.json.get('offset', 0)  # mulai dari data ke berapa
+    batch_size = 50
+
+    if not dataset_id:
+        return jsonify({'success': False, 'message': 'Dataset tidak dipilih.'})
+
+    dataset = Dataset.query.filter_by(id=dataset_id, user_id=current_user.id).first()
+    if not dataset:
+        return jsonify({'success': False, 'message': 'Dataset tidak ditemukan.'})
+
+    # Ambil hanya yang belum diproses, batch 50
+    items = DataItem.query.filter_by(
+        dataset_id=dataset_id,
+        is_preprocessed=False
+    ).limit(batch_size).all()
+
+    if not items:
+        # Semua sudah selesai
+        total = DataItem.query.filter_by(dataset_id=dataset_id).count()
+        return jsonify({
+            'success'  : True,
+            'done'     : True,
+            'processed': total,
+            'message'  : f'Semua {total} data selesai dipreproses!',
+        })
+
+    processed = 0
+    for item in items:
+        result = preprocess(item.teks)
+        item.teks_preprocessed = result['result']
+        item.is_preprocessed   = True
+        processed += 1
+
+    db.session.commit()
+
+    total      = DataItem.query.filter_by(dataset_id=dataset_id).count()
+    done_count = DataItem.query.filter_by(dataset_id=dataset_id, is_preprocessed=True).count()
+
+    return jsonify({
+        'success'   : True,
+        'done'      : False,  # masih ada sisa
+        'processed' : done_count,
+        'total'     : total,
+        'message'   : f'Diproses {done_count} dari {total} data...',
+    })
     """Proses seluruh dataset, simpan hasil ke DB, stream progress via JSON."""
     dataset_id = request.json.get('dataset_id')
     if not dataset_id:
