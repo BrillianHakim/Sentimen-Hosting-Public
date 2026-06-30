@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
 from flask_login import login_required, current_user
-from models import db, Dataset, DataItem
+from models import db, Dataset, DataItem, HasilKlasifikasi
 import pandas as pd
 import os
 from werkzeug.utils import secure_filename
@@ -143,17 +143,23 @@ def save():
 @upload_bp.route('/upload/delete/<int:dataset_id>', methods=['POST'])
 @login_required
 def delete(dataset_id):
+    """Hapus dataset pakai bulk delete (cepat, tidak timeout di database remote)."""
     dataset = Dataset.query.filter_by(id=dataset_id, user_id=current_user.id).first_or_404()
+    nama = dataset.nama
+
+    DataItem.query.filter_by(dataset_id=dataset_id).delete(synchronize_session=False)
+    HasilKlasifikasi.query.filter_by(dataset_id=dataset_id).delete(synchronize_session=False)
     db.session.delete(dataset)
     db.session.commit()
-    flash(f'Dataset "{dataset.nama}" berhasil dihapus.', 'info')
+
+    flash(f'Dataset "{nama}" berhasil dihapus.', 'info')
     return redirect(url_for('upload.index'))
 
 
 @upload_bp.route('/upload/delete-all', methods=['POST'])
 @login_required
 def delete_all():
-    """Hapus semua dataset milik user beserta seluruh data_items-nya."""
+    """Hapus semua dataset milik user pakai bulk delete (cepat, tidak timeout)."""
     datasets = Dataset.query.filter_by(user_id=current_user.id).all()
     jumlah   = len(datasets)
 
@@ -161,8 +167,11 @@ def delete_all():
         flash('Tidak ada dataset yang dihapus.', 'warning')
         return redirect(url_for('upload.index'))
 
-    for ds in datasets:
-        db.session.delete(ds)
+    dataset_ids = [ds.id for ds in datasets]
+
+    DataItem.query.filter(DataItem.dataset_id.in_(dataset_ids)).delete(synchronize_session=False)
+    HasilKlasifikasi.query.filter(HasilKlasifikasi.dataset_id.in_(dataset_ids)).delete(synchronize_session=False)
+    Dataset.query.filter(Dataset.id.in_(dataset_ids)).delete(synchronize_session=False)
 
     db.session.commit()
     flash(f'{jumlah} dataset beserta seluruh datanya berhasil dihapus.', 'success')
