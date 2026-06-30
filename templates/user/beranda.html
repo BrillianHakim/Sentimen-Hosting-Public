@@ -10,12 +10,6 @@
 
 <!-- Stat Cards -->
 <div class="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-  <!-- <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
-    <div class="w-11 h-11 bg-blue-50 rounded-lg flex items-center justify-center text-xl mb-4">🎯</div>
-    <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Akurasi Model</p>
-    <p class="text-3xl font-extrabold text-blue-600">{{ stats.akurasi }}%</p>
-    <p class="text-xs text-gray-400 mt-1">SVM + SMOTE</p>
-  </div> -->
   <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
     <div class="w-11 h-11 bg-gray-50 rounded-lg flex items-center justify-center text-xl mb-4">📊</div>
     <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Total Data</p>
@@ -24,15 +18,21 @@
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
     <div class="w-11 h-11 bg-green-50 rounded-lg flex items-center justify-center text-xl mb-4">😊</div>
-    <p class="text-[11px] font-bold tracking-widests text-gray-400 uppercase mb-2">Positif</p>
+    <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Positif</p>
     <p class="text-3xl font-extrabold text-green-600">{{ "{:,}".format(stats.positif) }}</p>
     <p class="text-xs text-gray-400 mt-1">{{ stats.pct_positif }}% dari total</p>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
     <div class="w-11 h-11 bg-red-50 rounded-lg flex items-center justify-center text-xl mb-4">😞</div>
-    <p class="text-[11px] font-bold tracking-widests text-gray-400 uppercase mb-2">Negatif</p>
+    <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Negatif</p>
     <p class="text-3xl font-extrabold text-red-600">{{ "{:,}".format(stats.negatif) }}</p>
     <p class="text-xs text-gray-400 mt-1">{{ stats.pct_negatif }}% dari total</p>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
+    <div class="w-11 h-11 bg-yellow-50 rounded-lg flex items-center justify-center text-xl mb-4">😐</div>
+    <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Netral</p>
+    <p class="text-3xl font-extrabold text-yellow-600">{{ "{:,}".format(stats.netral) }}</p>
+    <p class="text-xs text-gray-400 mt-1">{{ stats.pct_netral }}% dari total</p>
   </div>
 </div>
 
