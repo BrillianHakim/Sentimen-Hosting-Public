@@ -402,14 +402,15 @@
     document.getElementById('btnGabung').classList.remove('hidden');
   }
 
-  // ── Gabung ────────────────────────────────────────────────────────────────
-  async function doGabung() {
+  // ── Gabung (dengan auto-retry) ──────────────────────────────────────────
+  async function doGabung(isRetry = false) {
     const dsId = document.getElementById('fileDatasetSelect').value;
     if (!dsId)  { showAlert('fileAlert','danger','Pilih dataset tujuan terlebih dahulu.'); return; }
     if (!currentFile || !previewMeta) return;
 
-    document.getElementById('btnGabung').textContent = 'Menggabungkan...';
+    document.getElementById('btnGabung').textContent = isRetry ? 'Mencoba lagi...' : 'Menggabungkan...';
     document.getElementById('btnGabung').disabled = true;
+    hideAlert('fileAlert');
 
     const fd = new FormData();
     fd.append('file',          currentFile);
@@ -418,21 +419,41 @@
     fd.append('label_col',     previewMeta.label_col);
     fd.append('skip_duplikat', document.getElementById('skipDuplikat').checked ? 'true' : 'false');
 
-    const res  = await fetch('{{ url_for("update_data.gabung") }}', { method:'POST', body:fd });
-    const data = await res.json();
+    try {
+      const res  = await fetch('{{ url_for("update_data.gabung") }}', { method:'POST', body:fd });
 
-    document.getElementById('btnGabung').innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Gabungkan ke Dataset';
-    document.getElementById('btnGabung').disabled = false;
+      if (!res.ok && !isRetry) {
+        // Gagal karena timeout/server sibuk, coba ulang otomatis sekali
+        showAlert('fileAlert','danger','Koneksi lambat, mencoba lagi otomatis...');
+        setTimeout(() => doGabung(true), 1500);
+        return;
+      }
 
-    showAlert('fileAlert', data.success ? 'success' : 'danger', data.message);
-    if (data.success) {
-      document.getElementById('previewSection').classList.add('hidden');
-      document.getElementById('btnGabung').classList.add('hidden');
-      clearFile({ stopPropagation: ()=>{} });
-      setTimeout(() => location.reload(), 1500);
+      const data = await res.json();
+
+      document.getElementById('btnGabung').innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Gabungkan ke Dataset';
+      document.getElementById('btnGabung').disabled = false;
+
+      showAlert('fileAlert', data.success ? 'success' : 'danger', data.message);
+      if (data.success) {
+        document.getElementById('previewSection').classList.add('hidden');
+        document.getElementById('btnGabung').classList.add('hidden');
+        clearFile({ stopPropagation: ()=>{} });
+        setTimeout(() => location.reload(), 1500);
+      }
+    } catch (e) {
+      if (!isRetry) {
+        // Network error, coba ulang otomatis sekali
+        showAlert('fileAlert','danger','Koneksi terputus, mencoba lagi otomatis...');
+        setTimeout(() => doGabung(true), 1500);
+      } else {
+        document.getElementById('btnGabung').innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Gabungkan ke Dataset';
+        document.getElementById('btnGabung').disabled = false;
+        showAlert('fileAlert','danger','Gagal terhubung ke server. Coba klik tombol manual lagi.');
+      }
     }
   }
-
+  
   // ── Input Manual ──────────────────────────────────────────────────────────
   async function submitManual() {
     const dsId  = document.getElementById('manualDatasetSelect').value;
