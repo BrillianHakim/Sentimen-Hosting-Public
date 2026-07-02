@@ -3,14 +3,14 @@
 {% block page_title %}Prediksi Teks{% endblock %}
 
 {% block content %}
-<div class="mb-7">
-  <h1 class="text-2xl font-extrabold tracking-tight">Prediksi Teks</h1>
-  <p class="text-gray-400 text-sm mt-1">Masukkan ulasan wisata pantai untuk dianalisis sentimennya</p>
+<div class="mb-5 sm:mb-7">
+  <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Prediksi Teks</h1>
+  <p class="text-gray-400 text-xs sm:text-sm mt-1">Masukkan ulasan wisata pantai untuk dianalisis sentimennya</p>
 </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-5">
   <div class="space-y-5">
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
       <p class="font-bold mb-1">Input Teks Ulasan</p>
       <p class="text-gray-400 text-xs mb-4">Ketik atau paste ulasan wisata pantai di bawah ini</p>
 
@@ -38,8 +38,8 @@
       <div id="alertPred" class="hidden mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium bg-red-50 border border-red-200 text-red-700"></div>
 
       <button onclick="runPrediksi()" id="btnPrediksi"
-              class="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              class="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
         Analisis Sentimen
@@ -47,12 +47,12 @@
     </div>
 
     <!-- Hasil -->
-    <div id="hasilSection" class="hidden bg-white border border-gray-200 rounded-xl p-6">
+    <div id="hasilSection" class="hidden bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
       <p class="font-bold mb-5">Hasil Prediksi</p>
-      <div class="flex items-center justify-center gap-5 mb-6 p-6 bg-gray-50 rounded-xl">
-        <div id="hasilEmoji" class="text-6xl"></div>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 mb-6 p-4 sm:p-6 bg-gray-50 rounded-xl text-center sm:text-left">
+        <div id="hasilEmoji" class="text-5xl sm:text-6xl"></div>
         <div>
-          <p id="hasilLabel" class="text-3xl font-extrabold capitalize"></p>
+          <p id="hasilLabel" class="text-2xl sm:text-3xl font-extrabold capitalize"></p>
           <p id="hasilConf" class="text-sm text-gray-400 mt-1"></p>
         </div>
       </div>
@@ -66,33 +66,33 @@
 
   <!-- Info -->
   <div class="space-y-4">
-    <div class="bg-white border border-gray-200 rounded-xl p-5">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-5">
       <p class="font-bold text-sm mb-3">Cara Kerja</p>
       <div class="space-y-3">
         <div class="flex gap-3">
           <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 text-xs font-bold flex items-center justify-center shrink-0">1</span>
-          <div>
+          <div class="min-w-0">
             <p class="text-sm font-semibold">Input Teks</p>
             <p class="text-xs text-gray-400">Ketik ulasan wisata pantai</p>
           </div>
         </div>
         <div class="flex gap-3">
           <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 text-xs font-bold flex items-center justify-center shrink-0">2</span>
-          <div>
+          <div class="min-w-0">
             <p class="text-sm font-semibold">Preprocessing</p>
             <p class="text-xs text-gray-400">Teks dibersihkan & dinormalisasi otomatis</p>
           </div>
         </div>
         <div class="flex gap-3">
           <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 text-xs font-bold flex items-center justify-center shrink-0">3</span>
-          <div>
+          <div class="min-w-0">
             <p class="text-sm font-semibold">Prediksi SVM</p>
             <p class="text-xs text-gray-400">Model klasifikasi sentimen teks kamu</p>
           </div>
         </div>
         <div class="flex gap-3">
           <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 text-xs font-bold flex items-center justify-center shrink-0">4</span>
-          <div>
+          <div class="min-w-0">
             <p class="text-sm font-semibold">Hasil + Probabilitas</p>
             <p class="text-xs text-gray-400">Lihat sentimen & tingkat keyakinan model</p>
           </div>

@@ -3,81 +3,81 @@
 {% block page_title %}Beranda{% endblock %}
 
 {% block content %}
-<div class="mb-7">
-  <h1 class="text-2xl font-extrabold tracking-tight">Selamat Datang, {{ current_user.name }}! 👋</h1>
-  <p class="text-gray-400 text-sm mt-1">Sistem Analisis Sentimen Kepuasan Pengunjung Wisata Pantai</p>
+<div class="mb-5 sm:mb-7">
+  <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Selamat Datang, {{ current_user.name }}! 👋</h1>
+  <p class="text-gray-400 text-xs sm:text-sm mt-1">Sistem Analisis Sentimen Kepuasan Pengunjung Wisata Pantai</p>
 </div>
 
 <!-- Stat Cards -->
-<div class="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
-    <div class="w-11 h-11 bg-gray-50 rounded-lg flex items-center justify-center text-xl mb-4">📊</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-6">
+  <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-md transition">
+    <div class="w-10 h-10 sm:w-11 sm:h-11 bg-gray-50 rounded-lg flex items-center justify-center text-lg sm:text-xl mb-3 sm:mb-4">📊</div>
     <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Total Data</p>
-    <p class="text-3xl font-extrabold">{{ "{:,}".format(stats.total_data) }}</p>
+    <p class="text-2xl sm:text-3xl font-extrabold break-words">{{ "{:,}".format(stats.total_data) }}</p>
     <p class="text-xs text-gray-400 mt-1">data penelitian</p>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
-    <div class="w-11 h-11 bg-green-50 rounded-lg flex items-center justify-center text-xl mb-4">😊</div>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-md transition">
+    <div class="w-10 h-10 sm:w-11 sm:h-11 bg-green-50 rounded-lg flex items-center justify-center text-lg sm:text-xl mb-3 sm:mb-4">😊</div>
     <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Positif</p>
-    <p class="text-3xl font-extrabold text-green-600">{{ "{:,}".format(stats.positif) }}</p>
+    <p class="text-2xl sm:text-3xl font-extrabold text-green-600 break-words">{{ "{:,}".format(stats.positif) }}</p>
     <p class="text-xs text-gray-400 mt-1">{{ stats.pct_positif }}% dari total</p>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
-    <div class="w-11 h-11 bg-red-50 rounded-lg flex items-center justify-center text-xl mb-4">😞</div>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-md transition">
+    <div class="w-10 h-10 sm:w-11 sm:h-11 bg-red-50 rounded-lg flex items-center justify-center text-lg sm:text-xl mb-3 sm:mb-4">😞</div>
     <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Negatif</p>
-    <p class="text-3xl font-extrabold text-red-600">{{ "{:,}".format(stats.negatif) }}</p>
+    <p class="text-2xl sm:text-3xl font-extrabold text-red-600 break-words">{{ "{:,}".format(stats.negatif) }}</p>
     <p class="text-xs text-gray-400 mt-1">{{ stats.pct_negatif }}% dari total</p>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
-    <div class="w-11 h-11 bg-yellow-50 rounded-lg flex items-center justify-center text-xl mb-4">😐</div>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-md transition">
+    <div class="w-10 h-10 sm:w-11 sm:h-11 bg-yellow-50 rounded-lg flex items-center justify-center text-lg sm:text-xl mb-3 sm:mb-4">😐</div>
     <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-2">Netral</p>
-    <p class="text-3xl font-extrabold text-yellow-600">{{ "{:,}".format(stats.netral) }}</p>
+    <p class="text-2xl sm:text-3xl font-extrabold text-yellow-600 break-words">{{ "{:,}".format(stats.netral) }}</p>
     <p class="text-xs text-gray-400 mt-1">{{ stats.pct_netral }}% dari total</p>
   </div>
 </div>
 
 <!-- Chart + Info -->
 <div class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5">
-  <div class="bg-white border border-gray-200 rounded-xl p-6">
+  <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
     <p class="font-bold mb-0.5">Distribusi Sentimen</p>
     <p class="text-gray-400 text-xs mb-5">Proporsi data penelitian berdasarkan label sentimen</p>
     <div class="space-y-4 mb-6">
       <div>
-        <div class="flex justify-between text-sm mb-1.5">
+        <div class="flex justify-between text-sm mb-1.5 gap-2">
           <span class="font-semibold">Positif</span>
-          <span class="font-bold text-green-600">{{ stats.pct_positif }}%</span>
+          <span class="font-bold text-green-600 shrink-0">{{ stats.pct_positif }}%</span>
         </div>
         <div class="h-3 bg-gray-100 rounded-full overflow-hidden">
           <div class="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full" style="width:{{ stats.pct_positif }}%"></div>
         </div>
       </div>
       <div>
-        <div class="flex justify-between text-sm mb-1.5">
+        <div class="flex justify-between text-sm mb-1.5 gap-2">
           <span class="font-semibold">Negatif</span>
-          <span class="font-bold text-red-600">{{ stats.pct_negatif }}%</span>
+          <span class="font-bold text-red-600 shrink-0">{{ stats.pct_negatif }}%</span>
         </div>
         <div class="h-3 bg-gray-100 rounded-full overflow-hidden">
           <div class="h-full bg-gradient-to-r from-red-400 to-red-600 rounded-full" style="width:{{ stats.pct_negatif }}%"></div>
         </div>
       </div>
       <div>
-        <div class="flex justify-between text-sm mb-1.5">
+        <div class="flex justify-between text-sm mb-1.5 gap-2">
           <span class="font-semibold">Netral</span>
-          <span class="font-bold text-yellow-500">{{ stats.pct_netral }}%</span>
+          <span class="font-bold text-yellow-500 shrink-0">{{ stats.pct_netral }}%</span>
         </div>
         <div class="h-3 bg-gray-100 rounded-full overflow-hidden">
           <div class="h-full bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-full" style="width:{{ stats.pct_netral }}%"></div>
         </div>
       </div>
     </div>
-    <div class="max-w-[300px] mx-auto">
+    <div class="w-full max-w-[300px] mx-auto relative" style="height:260px;">
       <canvas id="chartPie"></canvas>
     </div>
   </div>
 
   <!-- Menu Cepat -->
   <div class="space-y-4">
-    <div class="bg-white border border-gray-200 rounded-xl p-5">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-5">
       <p class="font-bold text-sm mb-4">Menu Utama</p>
       <div class="space-y-3">
         <a href="{{ url_for('user.analisis_file') }}"
@@ -88,7 +88,7 @@
               <polyline points="14 2 14 8 20 8"/>
             </svg>
           </div>
-          <div>
+          <div class="min-w-0">
             <p class="text-sm font-bold text-blue-700">Analisis File</p>
             <p class="text-xs text-blue-500">Upload Excel/CSV → lihat hasil prediksi</p>
           </div>
@@ -100,7 +100,7 @@
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
           </div>
-          <div>
+          <div class="min-w-0">
             <p class="text-sm font-bold text-green-700">Prediksi Teks</p>
             <p class="text-xs text-green-500">Input 1 teks → lihat sentimennya</p>
           </div>
@@ -113,7 +113,7 @@
               <line x1="6" y1="20" x2="6" y2="14"/>
             </svg>
           </div>
-          <div>
+          <div class="min-w-0">
             <p class="text-sm font-bold text-purple-700">Hasil Riset</p>
             <p class="text-xs text-purple-500">Lihat hasil penelitian lengkap</p>
           </div>
@@ -145,7 +145,7 @@
       },
       options: {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: {
             position: 'bottom',

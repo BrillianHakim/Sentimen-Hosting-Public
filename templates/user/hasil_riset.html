@@ -3,45 +3,45 @@
 {% block page_title %}Hasil Riset{% endblock %}
 
 {% block content %}
-<div class="mb-7">
-  <h1 class="text-2xl font-extrabold tracking-tight">Hasil Riset</h1>
-  <p class="text-gray-400 text-sm mt-1">Riwayat aktivitas dan hasil analisis sentimen Anda</p>
+<div class="mb-5 sm:mb-7">
+  <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Hasil Riset</h1>
+  <p class="text-gray-400 text-xs sm:text-sm mt-1">Riwayat aktivitas dan hasil analisis sentimen Anda</p>
 </div>
 
 <!-- Stat Aktivitas User -->
-<div class="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
-    <div class="w-11 h-11 bg-blue-50 rounded-lg flex items-center justify-center text-xl mb-4">📂</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-6">
+  <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-md transition">
+    <div class="w-10 h-10 sm:w-11 sm:h-11 bg-blue-50 rounded-lg flex items-center justify-center text-lg sm:text-xl mb-3 sm:mb-4">📂</div>
     <p class="text-[11px] font-bold tracking-widests text-gray-400 uppercase mb-2">File Dianalisis</p>
-    <p class="text-3xl font-extrabold text-blue-600">{{ stats.total_analisis }}</p>
+    <p class="text-2xl sm:text-3xl font-extrabold text-blue-600 break-words">{{ stats.total_analisis }}</p>
     <p class="text-xs text-gray-400 mt-1">total file</p>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
-    <div class="w-11 h-11 bg-purple-50 rounded-lg flex items-center justify-center text-xl mb-4">🔍</div>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-md transition">
+    <div class="w-10 h-10 sm:w-11 sm:h-11 bg-purple-50 rounded-lg flex items-center justify-center text-lg sm:text-xl mb-3 sm:mb-4">🔍</div>
     <p class="text-[11px] font-bold tracking-widests text-gray-400 uppercase mb-2">Teks Diprediksi</p>
-    <p class="text-3xl font-extrabold text-purple-600">{{ stats.total_prediksi }}</p>
+    <p class="text-2xl sm:text-3xl font-extrabold text-purple-600 break-words">{{ stats.total_prediksi }}</p>
     <p class="text-xs text-gray-400 mt-1">total prediksi</p>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition">
-    <div class="w-11 h-11 bg-green-50 rounded-lg flex items-center justify-center text-xl mb-4">📊</div>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-md transition">
+    <div class="w-10 h-10 sm:w-11 sm:h-11 bg-green-50 rounded-lg flex items-center justify-center text-lg sm:text-xl mb-3 sm:mb-4">📊</div>
     <p class="text-[11px] font-bold tracking-widests text-gray-400 uppercase mb-2">Total Data Dianalisis</p>
-    <p class="text-3xl font-extrabold text-green-600">{{ "{:,}".format(stats.total_file_data) }}</p>
+    <p class="text-2xl sm:text-3xl font-extrabold text-green-600 break-words">{{ "{:,}".format(stats.total_file_data) }}</p>
     <p class="text-xs text-gray-400 mt-1">baris data</p>
   </div>
   
 </div>
 
 <!-- Riwayat Analisis File -->
-<div class="bg-white border border-gray-200 rounded-xl p-6 mb-5">
-  <div class="flex items-center justify-between mb-4">
+<div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 mb-5">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
     <div>
       <p class="font-bold mb-0.5">Riwayat Analisis File</p>
       <p class="text-gray-400 text-xs">Daftar file yang pernah kamu analisis</p>
     </div>
     {% if stats.riwayat_file %}
     <button onclick="hapusSemuaAnalisis()"
-            class="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-lg text-xs transition">
-      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            class="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-lg text-xs transition self-start sm:self-auto shrink-0">
+      <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
       </svg>
       Hapus Semua
@@ -51,7 +51,7 @@
 
   {% if stats.riwayat_file %}
   <div class="overflow-auto rounded-lg border border-gray-100 max-h-72">
-    <table class="w-full text-sm">
+    <table class="w-full min-w-[720px] text-sm">
       <thead class="sticky top-0">
         <tr class="bg-gray-50 border-b border-gray-100">
           <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase w-8">#</th>
@@ -102,16 +102,16 @@
 </div>
 
 <!-- Riwayat Prediksi Teks -->
-<div class="bg-white border border-gray-200 rounded-xl p-6 mb-5">
-  <div class="flex items-center justify-between mb-4">
+<div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 mb-5">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
     <div>
       <p class="font-bold mb-0.5">Riwayat Prediksi Teks</p>
       <p class="text-gray-400 text-xs">Daftar teks yang pernah kamu prediksi</p>
     </div>
     {% if stats.riwayat_teks %}
     <button onclick="hapusSemuaPrediksi()"
-            class="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-lg text-xs transition">
-      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            class="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-lg text-xs transition self-start sm:self-auto shrink-0">
+      <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
       </svg>
       Hapus Semua
@@ -121,7 +121,7 @@
 
   {% if stats.riwayat_teks %}
   <div class="overflow-auto rounded-lg border border-gray-100 max-h-72">
-    <table class="w-full text-sm">
+    <table class="w-full min-w-[640px] text-sm">
       <thead class="sticky top-0">
         <tr class="bg-gray-50 border-b border-gray-100">
           <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase w-8">#</th>
@@ -164,17 +164,17 @@
 </div>
 
 <!-- Info Model -->
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-5">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
 
 <!-- Kata Dominan per Sentimen -->
 {% if stats.total_file_data > 0 %}
-<div class="bg-white border border-gray-200 rounded-xl p-6 mb-5 xl:col-span-2">
+<div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 mb-5 md:col-span-2">
   <p class="font-bold mb-0.5">Kata Dominan dari Analisis File</p>
   <p class="text-gray-400 text-xs mb-6">10 kata yang paling sering muncul pada setiap sentimen dari file yang kamu analisis</p>
 
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
     <!-- Positif -->
-    <div class="bg-green-50 rounded-xl p-5">
+    <div class="bg-green-50 rounded-xl p-4 sm:p-5">
       <div class="flex items-center gap-2 mb-4">
         <span class="text-2xl">😊</span>
         <div>
@@ -203,7 +203,7 @@
     </div>
 
     <!-- Negatif -->
-    <div class="bg-red-50 rounded-xl p-5">
+    <div class="bg-red-50 rounded-xl p-4 sm:p-5">
       <div class="flex items-center gap-2 mb-4">
         <span class="text-2xl">😞</span>
         <div>
@@ -232,7 +232,7 @@
     </div>
 
     <!-- Netral -->
-    <div class="bg-yellow-50 rounded-xl p-5">
+    <div class="bg-yellow-50 rounded-xl p-4 sm:p-5">
       <div class="flex items-center gap-2 mb-4">
         <span class="text-2xl">😐</span>
         <div>
@@ -262,11 +262,11 @@
   </div>
 </div>
 {% endif %}
-  <div class="bg-white border border-gray-200 rounded-xl p-6">
+  <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
     <p class="font-bold mb-1">Proporsi Sentimen Analisis Saya</p>
     <p class="text-gray-400 text-xs mb-4">Distribusi sentimen dari file yang pernah kamu analisis</p>
     {% if stats.total_user > 0 %}
-    <div class="max-w-[300px] mx-auto">
+    <div class="w-full max-w-[300px] mx-auto relative" style="height:260px;">
   <canvas id="chartPie"></canvas>
 </div>
     {% else %}
@@ -276,12 +276,12 @@
     </div>
     {% endif %}
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-6">
+  <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
     <p class="font-bold mb-4">Info Model SVM</p>
     <div class="space-y-3 text-sm">
-      <div class="flex justify-between py-2 border-b border-gray-50">
+      <div class="flex justify-between py-2 border-b border-gray-50 gap-2">
         <span class="text-gray-400">Algoritma</span>
-        <span class="font-semibold">Support Vector Machine</span>
+        <span class="font-semibold text-right">Support Vector Machine</span>
       </div>
       <!-- <div class="flex justify-between py-2 border-b border-gray-50">
         <span class="text-gray-400">Kernel</span>
@@ -291,13 +291,13 @@
         <span class="text-gray-400">Balancing</span>
         <span class="font-semibold">SMOTE</span>
       </div> -->
-      <div class="flex justify-between py-2 border-b border-gray-50">
+      <div class="flex justify-between py-2 border-b border-gray-50 gap-2">
         <span class="text-gray-400">Vektorisasi</span>
-        <span class="font-semibold">TF-IDF</span>
+        <span class="font-semibold text-right">TF-IDF</span>
       </div>
-      <div class="flex justify-between py-2">
+      <div class="flex justify-between py-2 gap-2">
         <span class="text-gray-400">Akurasi</span>
-        <span class="font-extrabold text-blue-600">{{ stats.akurasi }}%</span>
+        <span class="font-extrabold text-blue-600 text-right">{{ stats.akurasi }}%</span>
       </div>
     </div>
   </div>
@@ -358,6 +358,7 @@
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: {
             position: 'bottom',
