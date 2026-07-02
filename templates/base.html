@@ -20,13 +20,21 @@
 </head>
 <body class="bg-gray-50 font-sans text-gray-900">
 
+<!-- Overlay (mobile only, muncul saat sidebar terbuka) -->
+<div id="sidebarOverlay"
+     class="fixed inset-0 bg-black/40 z-40 hidden md:hidden"
+     onclick="toggleSidebar(false)"></div>
+
 <!-- Sidebar -->
-<aside class="fixed top-0 left-0 bottom-0 w-56 bg-white border-r border-gray-200 flex flex-col z-50">
-  <div class="px-5 py-6 text-blue-600 font-extrabold text-lg border-b border-gray-200">
+<aside id="sidebar"
+       class="fixed top-0 left-0 bottom-0 w-64 md:w-56 bg-white border-r border-gray-200 flex flex-col z-50
+              -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out">
+  <div class="px-5 py-6 text-blue-600 font-extrabold text-lg border-b border-gray-200 flex items-center justify-between">
     Analisis Sentimen
+    <button onclick="toggleSidebar(false)" class="md:hidden text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
   </div>
 
-  <nav class="flex-1 px-3 py-3 space-y-0.5">
+  <nav class="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
 
     <a href="{{ url_for('dashboard.index') }}"
        class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
@@ -101,14 +109,22 @@
 </aside>
 
 <!-- Topbar -->
-<header class="fixed top-0 left-56 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-40">
-  <span class="text-sm text-gray-400 font-medium">{% block page_title %}Overview Panel{% endblock %}</span>
-  <a href="{{ url_for('profile.index') }}" class="flex items-center gap-3 hover:opacity-80 transition">
-    <div class="text-right leading-tight">
+<header class="fixed top-0 left-0 md:left-56 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-8 z-30">
+  <div class="flex items-center gap-3 min-w-0">
+    <!-- Tombol hamburger, hanya tampil di mobile -->
+    <button onclick="toggleSidebar(true)" class="md:hidden text-gray-500 hover:text-blue-600 shrink-0" aria-label="Buka menu">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <span class="text-sm text-gray-400 font-medium truncate">{% block page_title %}Overview Panel{% endblock %}</span>
+  </div>
+  <a href="{{ url_for('profile.index') }}" class="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition shrink-0">
+    <div class="text-right leading-tight hidden sm:block">
       <div class="text-sm font-bold">{{ current_user.name }}</div>
       <div class="text-[11px] text-gray-400 uppercase tracking-wider">{{ current_user.role }}</div>
     </div>
-    <div class="w-9 h-9 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">
+    <div class="w-9 h-9 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
       {{ current_user.get_initials() }}
     </div>
   </a>
@@ -117,7 +133,7 @@
 <!-- Flash Messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-  <div class="fixed top-20 right-6 z-50 flex flex-col gap-2" id="flashContainer">
+  <div class="fixed top-20 left-4 right-4 sm:left-auto sm:right-6 z-50 flex flex-col gap-2" id="flashContainer">
     {% for category, message in messages %}
     {% set color_map = {
       'success': 'bg-green-50 border-green-200 text-green-800',
@@ -125,9 +141,9 @@
       'info':    'bg-blue-50 border-blue-200 text-blue-800',
       'danger':  'bg-red-50 border-red-200 text-red-800'
     } %}
-    <div class="flex items-center gap-2 px-4 py-3 rounded-lg border text-sm font-medium shadow-md max-w-sm {{ color_map.get(category, color_map['info']) }}">
-      {{ message }}
-      <button onclick="this.parentElement.remove()" class="ml-auto opacity-50 hover:opacity-100 text-xs">✕</button>
+    <div class="flex items-center gap-2 px-4 py-3 rounded-lg border text-sm font-medium shadow-md sm:max-w-sm {{ color_map.get(category, color_map['info']) }}">
+      <span class="min-w-0 break-words">{{ message }}</span>
+      <button onclick="this.parentElement.remove()" class="ml-auto opacity-50 hover:opacity-100 text-xs shrink-0">✕</button>
     </div>
     {% endfor %}
   </div>
@@ -136,10 +152,33 @@
 {% endwith %}
 
 <!-- Main Content -->
-<main class="ml-56 mt-16 p-8 min-h-[calc(100vh-4rem)]">
+<main class="md:ml-56 mt-16 p-4 sm:p-6 md:p-8 min-h-[calc(100vh-4rem)]">
   {% block content %}{% endblock %}
 </main>
 
 {% block extra_scripts %}{% endblock %}
+
+<script>
+  const sidebar   = document.getElementById('sidebar');
+  const overlay   = document.getElementById('sidebarOverlay');
+
+  function toggleSidebar(open) {
+    if (open) {
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.remove('hidden');
+    } else {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+    }
+  }
+
+  // Tutup sidebar otomatis saat layar di-resize ke ukuran desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      overlay.classList.add('hidden');
+    }
+  });
+</script>
+
 </body>
 </html>
