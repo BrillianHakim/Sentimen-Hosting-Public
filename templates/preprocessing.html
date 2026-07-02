@@ -3,9 +3,9 @@
 {% block page_title %}Preprocessing{% endblock %}
 
 {% block content %}
-<div class="mb-7">
-  <h1 class="text-2xl font-extrabold tracking-tight">Preprocessing Teks</h1>
-  <p class="text-gray-400 text-sm mt-1">Bersihkan dan normalisasi teks sebelum masuk tahap klasifikasi SVM</p>
+<div class="mb-5 sm:mb-7">
+  <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Preprocessing Teks</h1>
+  <p class="text-gray-400 text-xs sm:text-sm mt-1">Bersihkan dan normalisasi teks sebelum masuk tahap klasifikasi SVM</p>
 </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-5">
@@ -110,7 +110,7 @@
     </div>
 
     <!-- Proses Dataset -->
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
       <p class="font-bold mb-0.5">Proses Dataset</p>
       <p class="text-gray-400 text-xs mb-4">Pilih dataset lalu jalankan preprocessing untuk semua data</p>
 
@@ -126,26 +126,26 @@
       </div>
 
       <!-- Info dataset -->
-      <div id="datasetInfo" class="hidden mb-4 grid grid-cols-3 gap-3">
-        <div class="bg-gray-50 rounded-lg p-3 text-center">
-          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Total</p>
-          <p id="infoTotal" class="text-xl font-extrabold text-gray-800">-</p>
+      <div id="datasetInfo" class="hidden mb-4 grid grid-cols-3 gap-2 sm:gap-3">
+        <div class="bg-gray-50 rounded-lg p-2 sm:p-3 text-center">
+          <p class="text-[9px] sm:text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1 leading-tight">Total</p>
+          <p id="infoTotal" class="text-base sm:text-xl font-extrabold text-gray-800 break-words">-</p>
         </div>
-        <div class="bg-green-50 rounded-lg p-3 text-center">
-          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Sudah Diproses</p>
-          <p id="infoDone" class="text-xl font-extrabold text-green-600">-</p>
+        <div class="bg-green-50 rounded-lg p-2 sm:p-3 text-center">
+          <p class="text-[9px] sm:text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1 leading-tight">Sudah Diproses</p>
+          <p id="infoDone" class="text-base sm:text-xl font-extrabold text-green-600 break-words">-</p>
         </div>
-        <div class="bg-orange-50 rounded-lg p-3 text-center">
-          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Belum Diproses</p>
-          <p id="infoPending" class="text-xl font-extrabold text-orange-500">-</p>
+        <div class="bg-orange-50 rounded-lg p-2 sm:p-3 text-center">
+          <p class="text-[9px] sm:text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1 leading-tight">Belum Diproses</p>
+          <p id="infoPending" class="text-base sm:text-xl font-extrabold text-orange-500 break-words">-</p>
         </div>
       </div>
 
       <!-- Progress Bar -->
       <div id="progressWrap" class="hidden mb-4">
-        <div class="flex justify-between text-xs font-semibold text-gray-500 mb-1.5">
-          <span id="progressLabel">Memproses...</span>
-          <span id="progressPct">0%</span>
+        <div class="flex justify-between text-xs font-semibold text-gray-500 mb-1.5 gap-2">
+          <span id="progressLabel" class="truncate">Memproses...</span>
+          <span id="progressPct" class="shrink-0">0%</span>
         </div>
         <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
           <div id="progressBar" class="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-300" style="width:0%"></div>
@@ -155,25 +155,25 @@
       <!-- Alert -->
       <div id="runAlert" class="hidden mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium"></div>
 
-      <div class="flex gap-2 flex-wrap">
+      <div class="flex flex-col sm:flex-row gap-2 sm:flex-wrap">
         <button id="btnRun" onclick="runPreprocessing()"
-                class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition disabled:opacity-40" disabled>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition disabled:opacity-40 w-full sm:w-auto" disabled>
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <polygon points="5 3 19 12 5 21 5 3"/>
           </svg>
           Jalankan Preprocessing
         </button>
         <button id="btnDownloadCSV" onclick="downloadPreprocessing('csv')"
-                class="hidden flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                class="hidden items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm transition w-full sm:w-auto">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
           Download CSV
         </button>
         <button id="btnDownloadExcel" onclick="downloadPreprocessing('excel')"
-                class="hidden flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg text-sm transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                class="hidden items-center justify-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg text-sm transition w-full sm:w-auto">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
@@ -183,17 +183,17 @@
     </div>
 
     <!-- Tabel Perbandingan -->
-    <div id="comparisonSection" class="hidden bg-white border border-gray-200 rounded-xl p-6">
-      <div class="flex items-center justify-between mb-4">
+    <div id="comparisonSection" class="hidden bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
         <div>
           <p class="font-bold">Perbandingan Sebelum & Sesudah</p>
           <p class="text-gray-400 text-xs mt-0.5">Semua data · scroll untuk melihat selengkapnya</p>
         </div>
-        <span id="compBadge" class="text-xs font-semibold bg-green-50 text-green-600 px-3 py-1 rounded-full"></span>
+        <span id="compBadge" class="text-xs font-semibold bg-green-50 text-green-600 px-3 py-1 rounded-full self-start sm:self-auto"></span>
       </div>
 
       <div class="overflow-auto rounded-lg border border-gray-100 max-h-[500px]">
-        <table class="w-full text-xs">
+        <table class="w-full min-w-[640px] text-xs">
           <thead class="sticky top-0">
             <tr class="bg-gray-50 border-b border-gray-100">
               <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase tracking-wide w-8">#</th>
@@ -213,7 +213,7 @@
   <!-- ── Kolom Kanan ── -->
   <div class="space-y-5">
     <!-- Tips -->
-    <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 sm:p-5">
       <div class="flex gap-2 mb-2">
         <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>

@@ -3,9 +3,9 @@
 {% block page_title %}Profil Saya{% endblock %}
 
 {% block content %}
-<div class="mb-7">
-  <h1 class="text-2xl font-extrabold tracking-tight">Profil Saya</h1>
-  <p class="text-gray-400 text-sm mt-1">Kelola informasi akun dan keamanan Anda</p>
+<div class="mb-5 sm:mb-7">
+  <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Profil Saya</h1>
+  <p class="text-gray-400 text-xs sm:text-sm mt-1">Kelola informasi akun dan keamanan Anda</p>
 </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-5">
@@ -14,7 +14,7 @@
   <div class="space-y-5">
 
     <!-- Edit Profil -->
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
       <p class="font-bold mb-1">Informasi Profil</p>
       <p class="text-gray-400 text-xs mb-6">Perbarui nama, email, dan peran Anda</p>
 
@@ -67,7 +67,7 @@
 
         <div class="pt-2">
           <button type="submit"
-                  class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition">
+                  class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition">
             Simpan Perubahan
           </button>
         </div>
@@ -75,7 +75,7 @@
     </div>
 
     <!-- Ganti Password -->
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
       <p class="font-bold mb-1">Ganti Password</p>
       <p class="text-gray-400 text-xs mb-6">Pastikan password baru minimal 8 karakter</p>
 
@@ -100,7 +100,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-semibold mb-1.5">Password Baru</label>
             <div class="relative">
@@ -129,7 +129,7 @@
 
         <div class="pt-2">
           <button type="submit"
-                  class="px-6 py-2.5 bg-gray-800 hover:bg-gray-900 text-white font-bold rounded-lg text-sm transition">
+                  class="w-full sm:w-auto px-6 py-2.5 bg-gray-800 hover:bg-gray-900 text-white font-bold rounded-lg text-sm transition">
             Ganti Password
           </button>
         </div>
@@ -142,27 +142,27 @@
   <div class="space-y-5">
 
     <!-- Avatar Card -->
-    <div class="bg-white border border-gray-200 rounded-xl p-6 text-center">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 text-center">
       <div class="w-20 h-20 rounded-full bg-blue-600 text-white text-2xl font-extrabold
                   flex items-center justify-center mx-auto mb-4">
         {{ current_user.get_initials() }}
       </div>
-      <p class="font-extrabold text-lg">{{ current_user.name }}</p>
-      <p class="text-sm text-gray-400 mt-0.5">{{ current_user.email }}</p>
+      <p class="font-extrabold text-lg break-words">{{ current_user.name }}</p>
+      <p class="text-sm text-gray-400 mt-0.5 break-words">{{ current_user.email }}</p>
       <span class="inline-block mt-2 text-xs font-semibold bg-blue-50 text-blue-600 px-3 py-1 rounded-full">
         {{ current_user.role }}
       </span>
 
       <div class="border-t border-gray-100 mt-5 pt-4 space-y-2 text-left">
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-400">Bergabung</span>
-          <span class="font-semibold text-gray-700">
+        <div class="flex justify-between text-sm gap-2">
+          <span class="text-gray-400 shrink-0">Bergabung</span>
+          <span class="font-semibold text-gray-700 text-right">
             {{ current_user.created_at.strftime('%d %b %Y') if current_user.created_at else '-' }}
           </span>
         </div>
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-400">Login Terakhir</span>
-          <span class="font-semibold text-gray-700">
+        <div class="flex justify-between text-sm gap-2">
+          <span class="text-gray-400 shrink-0">Login Terakhir</span>
+          <span class="font-semibold text-gray-700 text-right">
             {{ current_user.last_login.strftime('%d %b %Y') if current_user.last_login else '-' }}
           </span>
         </div>
@@ -170,9 +170,9 @@
     </div>
 
     <!-- Tips Keamanan -->
-    <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 sm:p-5">
       <p class="text-sm font-bold text-blue-700 mb-3 flex items-center gap-1.5">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         </svg>
         Tips Keamanan

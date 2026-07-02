@@ -3,9 +3,9 @@
 {% block page_title %}Upload Data{% endblock %}
 
 {% block content %}
-<div class="mb-7">
-  <h1 class="text-2xl font-extrabold tracking-tight">Upload Dataset</h1>
-  <p class="text-gray-400 text-sm mt-1">Upload file CSV atau Excel yang berisi kolom teks dan label sentimen</p>
+<div class="mb-5 sm:mb-7">
+  <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Upload Dataset</h1>
+  <p class="text-gray-400 text-xs sm:text-sm mt-1">Upload file CSV atau Excel yang berisi kolom teks dan label sentimen</p>
 </div>
 
 <div class="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-5">
@@ -14,13 +14,13 @@
   <div class="space-y-5">
 
     <!-- Drag & Drop Zone -->
-    <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
       <p class="font-bold mb-1">Pilih File Dataset</p>
       <p class="text-gray-400 text-xs mb-4">Format: CSV atau Excel (.xlsx / .xls) · Maks. 10 MB</p>
 
       <!-- Drop Zone -->
       <div id="dropZone"
-           class="border-2 border-dashed border-gray-200 rounded-xl p-10 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-all"
+           class="border-2 border-dashed border-gray-200 rounded-xl p-6 sm:p-10 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-all"
            onclick="document.getElementById('fileInput').click()"
            ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
         <div id="dropContent">
@@ -41,7 +41,7 @@
               <polyline points="14 2 14 8 20 8"/>
             </svg>
           </div>
-          <p id="selectedFileName" class="font-semibold text-gray-800 mb-1"></p>
+          <p id="selectedFileName" class="font-semibold text-gray-800 mb-1 break-all"></p>
           <p id="selectedFileSize" class="text-gray-400 text-sm"></p>
           <button type="button" onclick="clearFile(event)"
                   class="mt-3 text-xs text-red-500 hover:underline">Ganti file</button>
@@ -65,17 +65,17 @@
       </div>
 
       <!-- Buttons -->
-      <div class="flex gap-3 mt-5">
+      <div class="flex flex-col sm:flex-row gap-3 mt-5">
         <button id="btnPreview" onclick="doPreview()"
-                class="flex items-center gap-2 px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg text-sm transition disabled:opacity-40" disabled>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg text-sm transition disabled:opacity-40 w-full sm:w-auto" disabled>
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
           </svg>
           Preview & Validasi
         </button>
         <button id="btnSave" onclick="doSave()"
-                class="hidden flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                class="hidden items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition w-full sm:w-auto">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
             <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
           </svg>
@@ -85,49 +85,49 @@
     </div>
 
     <!-- Preview Section -->
-    <div id="previewSection" class="hidden bg-white border border-gray-200 rounded-xl p-6">
+    <div id="previewSection" class="hidden bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
 
       <!-- Validation Result -->
       <div id="validationOk" class="hidden mb-5 flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
         <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
         </svg>
-        <div>
+        <div class="min-w-0">
           <p class="text-sm font-bold text-green-700">Validasi Berhasil</p>
           <p id="validationMsg" class="text-xs text-green-600"></p>
         </div>
       </div>
 
       <!-- Stats Row -->
-      <div class="grid grid-cols-4 gap-3 mb-6">
-        <div class="bg-gray-50 rounded-lg p-3 text-center">
-          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Total</p>
-          <p id="statTotal" class="text-xl font-extrabold text-gray-800">-</p>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
+        <div class="bg-gray-50 rounded-lg p-2 sm:p-3 text-center">
+          <p class="text-[9px] sm:text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1 leading-tight">Total</p>
+          <p id="statTotal" class="text-base sm:text-xl font-extrabold text-gray-800 break-words">-</p>
         </div>
-        <div class="bg-green-50 rounded-lg p-3 text-center">
-          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Positif</p>
-          <p id="statPositif" class="text-xl font-extrabold text-green-600">-</p>
+        <div class="bg-green-50 rounded-lg p-2 sm:p-3 text-center">
+          <p class="text-[9px] sm:text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1 leading-tight">Positif</p>
+          <p id="statPositif" class="text-base sm:text-xl font-extrabold text-green-600 break-words">-</p>
         </div>
-        <div class="bg-red-50 rounded-lg p-3 text-center">
-          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Negatif</p>
-          <p id="statNegatif" class="text-xl font-extrabold text-red-600">-</p>
+        <div class="bg-red-50 rounded-lg p-2 sm:p-3 text-center">
+          <p class="text-[9px] sm:text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1 leading-tight">Negatif</p>
+          <p id="statNegatif" class="text-base sm:text-xl font-extrabold text-red-600 break-words">-</p>
         </div>
-        <div class="bg-yellow-50 rounded-lg p-3 text-center">
-          <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Netral</p>
-          <p id="statNetral" class="text-xl font-extrabold text-yellow-500">-</p>
+        <div class="bg-yellow-50 rounded-lg p-2 sm:p-3 text-center">
+          <p class="text-[9px] sm:text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1 leading-tight">Netral</p>
+          <p id="statNetral" class="text-base sm:text-xl font-extrabold text-yellow-500 break-words">-</p>
         </div>
       </div>
 
       <!-- Detected Columns -->
-      <div class="flex gap-3 mb-5 text-xs">
+      <div class="flex flex-wrap gap-2 sm:gap-3 mb-5 text-xs">
         <div class="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full font-semibold">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
           Kolom Teks: <span id="colText" class="font-bold"></span>
         </div>
         <div class="flex items-center gap-1.5 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full font-semibold">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 0 1 0 2.828l-7 7a2 2 0 0 1-2.828 0l-7-7A2 2 0 0 1 3 12V7a4 4 0 0 1 4-4z"/>
           </svg>
           Kolom Label: <span id="colLabel" class="font-bold"></span>
@@ -137,7 +137,7 @@
       <!-- Preview Table -->
       <p class="text-sm font-bold mb-3">Preview Data <span id="previewCount" class="text-gray-400 font-normal text-xs"></span></p>
       <div class="overflow-auto rounded-lg border border-gray-100 max-h-[500px]">
-        <table class="w-full text-sm">
+        <table class="w-full min-w-[520px] text-sm">
           <thead class="sticky top-0">
             <tr class="bg-gray-50 border-b border-gray-100">
               <th class="px-4 py-2.5 text-left text-xs font-bold text-gray-400 uppercase tracking-wide w-8">#</th>
@@ -156,46 +156,46 @@
   <div class="space-y-5">
 
     <!-- Format Guide -->
-    <div class="bg-white border border-gray-200 rounded-xl p-5">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-5">
       <p class="font-bold text-sm mb-4 flex items-center gap-2">
-        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
         </svg>
         Format File yang Didukung
       </p>
       <div class="space-y-3 text-sm text-gray-500">
         <p>File harus memiliki minimal <span class="font-semibold text-gray-700">2 kolom</span>:</p>
-        <div class="bg-gray-50 rounded-lg p-3 font-mono text-xs space-y-1">
-          <p class="text-green-600 font-bold">✓ Kolom Teks</p>
-          <p class="text-gray-400 ml-3">teks / text / tweet / komentar / content / ulasan</p>
-          <p class="text-blue-600 font-bold mt-2">✓ Kolom Label</p>
-          <p class="text-gray-400 ml-3">label / sentimen / sentiment / kategori / class</p>
+        <div class="bg-gray-50 rounded-lg p-3 font-mono text-xs space-y-1 overflow-x-auto">
+          <p class="text-green-600 font-bold whitespace-nowrap">✓ Kolom Teks</p>
+          <p class="text-gray-400 ml-3 whitespace-nowrap">teks / text / tweet / komentar / content / ulasan</p>
+          <p class="text-blue-600 font-bold mt-2 whitespace-nowrap">✓ Kolom Label</p>
+          <p class="text-gray-400 ml-3 whitespace-nowrap">label / sentimen / sentiment / kategori / class</p>
         </div>
         <p class="text-xs text-gray-400 mt-2">Nilai label: <span class="font-semibold">positif</span>, <span class="font-semibold">negatif</span>, atau <span class="font-semibold">netral</span></p>
       </div>
     </div>
 
     <!-- Contoh CSV -->
-    <div class="bg-white border border-gray-200 rounded-xl p-5">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-5">
       <p class="font-bold text-sm mb-3">Contoh Struktur CSV</p>
       <div class="bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-600 overflow-x-auto">
-        <p class="text-blue-600 font-bold">teks,label</p>
-        <p>Produk ini sangat bagus!,positif</p>
-        <p>Pelayanan sangat buruk,negatif</p>
-        <p>Biasa saja tidak ada yang spesial,netral</p>
+        <p class="text-blue-600 font-bold whitespace-nowrap">teks,label</p>
+        <p class="whitespace-nowrap">Produk ini sangat bagus!,positif</p>
+        <p class="whitespace-nowrap">Pelayanan sangat buruk,negatif</p>
+        <p class="whitespace-nowrap">Biasa saja tidak ada yang spesial,netral</p>
       </div>
     </div>
 
     <!-- Riwayat Upload -->
-    <div class="bg-white border border-gray-200 rounded-xl p-5">
+    <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-5">
 
       <!-- Header + Tombol Hapus Semua -->
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between gap-2 mb-4">
         <p class="font-bold text-sm">Riwayat Upload</p>
         {% if datasets %}
         <button onclick="confirmDeleteAll()"
-                class="flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                class="flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition shrink-0">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
             <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
           </svg>
@@ -211,7 +211,7 @@
           <div class="min-w-0">
             <p class="text-sm font-semibold text-gray-800 truncate">{{ ds.nama }}</p>
             <p class="text-xs text-gray-400 mt-0.5">{{ ds.total_rows }} baris · {{ ds.created_at.strftime('%d %b %Y') }}</p>
-            <div class="flex gap-2 mt-1.5">
+            <div class="flex gap-2 mt-1.5 flex-wrap">
               <span class="text-[11px] bg-green-50 text-green-600 font-semibold px-2 py-0.5 rounded-full">+{{ ds.positif_count }}</span>
               <span class="text-[11px] bg-red-50 text-red-600 font-semibold px-2 py-0.5 rounded-full">-{{ ds.negatif_count }}</span>
               {% if ds.netral_count > 0 %}
@@ -244,7 +244,7 @@
 
     <!-- Modal Konfirmasi Hapus Semua -->
     <div id="modalDeleteAll" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
-      <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm">
+      <div class="bg-white rounded-xl shadow-xl p-5 sm:p-6 w-full max-w-sm">
         <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
@@ -255,7 +255,7 @@
         <p class="text-sm text-gray-400 text-center mb-6">
           Semua dataset dan seluruh data di dalamnya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.
         </p>
-        <div class="flex gap-3">
+        <div class="flex flex-col sm:flex-row gap-3">
           <button onclick="closeModal()"
                   class="flex-1 py-2.5 border border-gray-200 text-gray-600 font-semibold rounded-lg text-sm hover:bg-gray-50 transition">
             Batal

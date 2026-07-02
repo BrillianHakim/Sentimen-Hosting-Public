@@ -3,21 +3,23 @@
 {% block page_title %}Klasifikasi SVM{% endblock %}
 
 {% block content %}
-<div class="mb-7">
-  <h1 class="text-2xl font-extrabold tracking-tight">Klasifikasi SVM</h1>
+<div class="mb-5 sm:mb-7">
+  <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Klasifikasi SVM</h1>
   
 </div>
 
 <!-- ── Tab Menu ── -->
-<div class="flex gap-1 bg-gray-100 p-1 rounded-xl mb-6 w-fit">
-  <button onclick="switchTab('db')" id="tab-db"
-          class="px-5 py-2 rounded-lg text-sm font-semibold transition tab-btn">
-    🗄️ Klasifikasi Data Web
-  </button>
-  <button onclick="switchTab('prediksi')" id="tab-prediksi"
-          class="px-5 py-2 rounded-lg text-sm font-semibold transition tab-btn">
-    🔍 Prediksi Teks Baru
-  </button>
+<div class="overflow-x-auto mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
+  <div class="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+    <button onclick="switchTab('db')" id="tab-db"
+            class="px-3 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition tab-btn whitespace-nowrap shrink-0">
+      🗄️ Klasifikasi Data Web
+    </button>
+    <button onclick="switchTab('prediksi')" id="tab-prediksi"
+            class="px-3 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition tab-btn whitespace-nowrap shrink-0">
+      🔍 Prediksi Teks Baru
+    </button>
+  </div>
 </div>
 
 <!-- ── Panel Hasil dari File (hidden) ── -->
@@ -60,7 +62,7 @@
       </div> -->
 
       <!-- Pilih dataset & jalankan -->
-      <div class="bg-white border border-gray-200 rounded-xl p-6">
+      <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
         <p class="font-bold mb-1">Klasifikasi Dataset</p>
         <p class="text-gray-400 text-xs mb-4">Pilih dataset yang sudah dipreprocessing lalu jalankan klasifikasi</p>
 
@@ -77,25 +79,25 @@
 
         <div id="dbAlert" class="hidden mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium"></div>
 
-        <div class="flex gap-2 flex-wrap">
+        <div class="flex flex-col sm:flex-row gap-2 sm:flex-wrap">
           <button id="btnKlasifikasiDB" onclick="runKlasifikasiDB()"
-                  class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition disabled:opacity-40">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  class="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition disabled:opacity-40 w-full sm:w-auto">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <polygon points="5 3 19 12 5 21 5 3"/>
             </svg>
             Jalankan Klasifikasi
           </button>
           <button id="btnDownloadCSV" onclick="downloadHasil('csv')"
-                  class="hidden flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  class="hidden items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm transition w-full sm:w-auto">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
             Download CSV
           </button>
           <button id="btnDownloadExcel" onclick="downloadHasil('excel')"
-                  class="hidden flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg text-sm transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  class="hidden items-center justify-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg text-sm transition w-full sm:w-auto">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
@@ -105,24 +107,24 @@
       </div>
 
       <!-- Hasil klasifikasi DB -->
-      <div id="dbHasilSection" class="hidden bg-white border border-gray-200 rounded-xl p-6">
+      <div id="dbHasilSection" class="hidden bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
         <p class="font-bold mb-4">Hasil Klasifikasi</p>
-        <div class="grid grid-cols-3 gap-3 mb-5">
-          <div class="bg-blue-50 rounded-lg p-3 text-center">
-            <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Akurasi</p>
-            <p id="dbAkurasi" class="text-xl font-extrabold text-blue-600">-</p>
+        <div class="grid grid-cols-3 gap-2 sm:gap-3 mb-5">
+          <div class="bg-blue-50 rounded-lg p-2 sm:p-3 text-center">
+            <p class="text-[9px] sm:text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1 leading-tight">Akurasi</p>
+            <p id="dbAkurasi" class="text-base sm:text-xl font-extrabold text-blue-600 break-words">-</p>
           </div>
-          <div class="bg-green-50 rounded-lg p-3 text-center">
-            <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Benar</p>
-            <p id="dbBenar" class="text-xl font-extrabold text-green-600">-</p>
+          <div class="bg-green-50 rounded-lg p-2 sm:p-3 text-center">
+            <p class="text-[9px] sm:text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1 leading-tight">Benar</p>
+            <p id="dbBenar" class="text-base sm:text-xl font-extrabold text-green-600 break-words">-</p>
           </div>
-          <div class="bg-red-50 rounded-lg p-3 text-center">
-            <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1">Salah</p>
-            <p id="dbSalah" class="text-xl font-extrabold text-red-500">-</p>
+          <div class="bg-red-50 rounded-lg p-2 sm:p-3 text-center">
+            <p class="text-[9px] sm:text-[11px] text-gray-400 uppercase font-bold tracking-wide mb-1 leading-tight">Salah</p>
+            <p id="dbSalah" class="text-base sm:text-xl font-extrabold text-red-500 break-words">-</p>
           </div>
         </div>
         <div class="overflow-auto rounded-lg border border-gray-100 max-h-[500px]">
-          <table class="w-full text-xs">
+          <table class="w-full min-w-[560px] text-xs">
             <thead class="sticky top-0">
               <tr class="bg-gray-50 border-b border-gray-100">
                 <th class="px-3 py-2.5 text-left font-bold text-gray-400 uppercase w-8">#</th>
@@ -141,13 +143,13 @@
 
     <!-- Info panel -->
     <div class="space-y-5">
-      <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-5">
         <p class="font-bold text-sm mb-3">Alur Klasifikasi Web</p>
         <div class="space-y-3">
           {% for step, desc in [('1. Upload Data','Upload CSV/Excel di menu Upload Data'),('2. Preprocessing','Jalankan preprocessing di menu Preprocessing'),('3. Klasifikasi','Pilih dataset di sini → Jalankan'),('4. Hasil','Lihat prediksi & akurasi real-time')] %}
           <div class="flex gap-3 items-start">
             <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">{{ loop.index }}</span>
-            <div>
+            <div class="min-w-0">
               <p class="text-sm font-semibold">{{ step.split('.')[1].strip() }}</p>
               <p class="text-xs text-gray-400">{{ desc }}</p>
             </div>
@@ -155,7 +157,7 @@
           {% endfor %}
         </div>
       </div>
-      <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
+      <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 sm:p-5">
         <p class="text-sm font-bold text-blue-700 mb-2">⚠️ Perhatian</p>
         <ul class="text-xs text-blue-600 space-y-1.5">
           <li>• Dataset harus sudah dipreprocessing dulu</li>
@@ -174,7 +176,7 @@
   <div class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5">
 
     <div class="space-y-5">
-      <div class="bg-white border border-gray-200 rounded-xl p-6">
+      <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
         <p class="font-bold mb-1">Prediksi Teks Baru</p>
         <p class="text-gray-400 text-xs mb-4">Masukkan teks ulasan untuk diprediksi sentimennya secara langsung</p>
 
@@ -187,8 +189,8 @@
         <div id="predAlert" class="hidden mb-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium"></div>
 
         <button onclick="runPrediksiTeks()"
-                class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           Prediksi Sentimen
@@ -196,14 +198,14 @@
       </div>
 
       <!-- Hasil Prediksi -->
-      <div id="predHasilSection" class="hidden bg-white border border-gray-200 rounded-xl p-6">
+      <div id="predHasilSection" class="hidden bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
         <p class="font-bold mb-5">Hasil Prediksi</p>
 
         <!-- Badge hasil -->
         <div class="flex items-center justify-center mb-6">
           <div id="predBadge" class="text-center">
-            <div id="predEmoji" class="text-6xl mb-3"></div>
-            <div id="predLabel" class="text-2xl font-extrabold mb-1"></div>
+            <div id="predEmoji" class="text-5xl sm:text-6xl mb-3"></div>
+            <div id="predLabel" class="text-xl sm:text-2xl font-extrabold mb-1"></div>
             <div id="predConf" class="text-sm text-gray-400"></div>
           </div>
         </div>
@@ -221,29 +223,29 @@
 
     <!-- Info -->
     <div class="space-y-5">
-      <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-5">
         <p class="font-bold text-sm mb-3">Info Model</p>
         <div class="space-y-2.5 text-sm">
-          <div class="flex justify-between">
+          <div class="flex justify-between gap-2">
             <span class="text-gray-400">Algoritma</span>
-            <span class="font-semibold">SVM Linear</span>
+            <span class="font-semibold text-right">SVM Linear</span>
           </div>
-          <div class="flex justify-between">
+          <div class="flex justify-between gap-2">
             <span class="text-gray-400">Balancing</span>
-            <span class="font-semibold">SMOTE</span>
+            <span class="font-semibold text-right">SMOTE</span>
           </div>
-          <div class="flex justify-between">
+          <div class="flex justify-between gap-2">
             <span class="text-gray-400">Akurasi</span>
-            <span class="font-semibold text-blue-600">{{ stats.akurasi }}%</span>
+            <span class="font-semibold text-blue-600 text-right">{{ stats.akurasi }}%</span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-gray-400">Label Output</span>
-            <span class="font-semibold">positive/negative/neutral</span>
+          <div class="flex justify-between gap-2">
+            <span class="text-gray-400 shrink-0">Label Output</span>
+            <span class="font-semibold text-right">positive/negative/neutral</span>
           </div>
         </div>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-5">
         <p class="font-bold text-sm mb-3">Contoh Teks</p>
         <div class="space-y-2">
           <button onclick="setContoh('Pantai ini sangat indah dan bersih, recommended buat liburan keluarga!')"
